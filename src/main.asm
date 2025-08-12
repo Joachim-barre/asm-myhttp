@@ -1,7 +1,7 @@
 %include "helpers.inc"
 
 section .data
-    hello_msg: db "Hello World!", 10, 0
+    start_msg: db "starting the server", 10, 0
 
 section .text
     global _start
@@ -19,14 +19,8 @@ main: ; () -> int
     push rbp
     mov rbp, rsp
 
-    mov rdi, hello_msg
+    mov rdi, start_msg
     call print
-
-    mov rdi, 1234
-    call printi
-
-    mov dil, 10
-    call putchar
 
     mov rax, 0 ; exit with code 0 (success)
 
