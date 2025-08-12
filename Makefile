@@ -6,7 +6,7 @@ LD=ld
 LDFLAGS=
 
 ASM=nasm
-ASMFLAGS=-f elf64
+ASMFLAGS=-f elf64 -Isrc
 
 all: $(PROG)
 .PHONY: clean run
