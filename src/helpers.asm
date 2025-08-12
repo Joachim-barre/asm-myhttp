@@ -2,6 +2,8 @@ section .text
     global strrev
     global int_abs
     global itoa
+    global putchar
+    global strlen
     global print
     global printi
 
