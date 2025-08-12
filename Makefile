@@ -1,12 +1,12 @@
 BUILDDIR=build
 PROG=$(BUILDDIR)/prog
-OBJS=$(BUILDDIR)/main.o
+OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/helpers.o
 
 LD=ld
 LDFLAGS=
 
 ASM=nasm
-ASMFLAGS=-f elf64 -Isrc
+ASMFLAGS=-f elf64 -Iinclude
 
 all: $(PROG)
 .PHONY: clean run

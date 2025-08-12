@@ -1,4 +1,9 @@
 section .text
+    global strrev
+    global int_abs
+    global itoa
+    global print
+    global printi
 
 strrev: 
 	push rbp

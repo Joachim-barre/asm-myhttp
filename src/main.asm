@@ -1,4 +1,4 @@
-%include "helpers.asm"
+%include "helpers.inc"
 
 section .data
     hello_msg: db "Hello World!", 10, 0
