@@ -1,6 +1,7 @@
+%include "helpers.asm"
+
 section .data
     hello_msg: db "Hello World!", 10, 0
-        .len equ $- hello_msg
 
 section .text
     global _start
@@ -18,11 +19,14 @@ main: ; () -> int
     push rbp
     mov rbp, rsp
 
-    mov rax, 1 ; sys_write
-    mov rdi, 1 ; fd=1 (stdout)
-    lea rsi, [hello_msg] ; buf=hello_msg
-    mov rdx, hello_msg.len ; count=hello_msg.len
-    syscall
+    mov rdi, hello_msg
+    call print
+
+    mov rdi, 1234
+    call printi
+
+    mov dil, 10
+    call putchar
 
     mov rax, 0 ; exit with code 0 (success)
 
