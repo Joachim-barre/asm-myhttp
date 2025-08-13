@@ -167,11 +167,7 @@ server_child_handler: ; (u64 fd (zero extended))
     mov dil, 10
     call putchar
 
-    ; call the callback
-    mov edi, [rbp-24]
-    lea rsi, [rbp-16]
-    mov rax, [rbp-32] ; TODO: pass callback
-    call [rax]
+    ; TODO: callback
 
     mov rsp, rbp
     pop rbp

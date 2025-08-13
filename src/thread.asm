@@ -85,15 +85,19 @@ thread_init: ; (startup_fn(u64), u64 callback_arg)
     mov r8, 0  ; tls=NULL
     syscall
 
+    test rax, rax
     jz .child_handler
+
+    mov rsp, rbp
+    pop rbp
 
     ret ; if we are the parent return
 
 .child_handler:
-    pop rax
-    pop rdi
+    mov rax, [rsp]
+    mov rdi, [rsp+8]
 
-    call [rax] ; call the child
+    call rax ; call the child
 
     mov rax, 60 ; sys_exit
     mov rdi, 0
