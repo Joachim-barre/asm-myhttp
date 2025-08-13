@@ -15,6 +15,8 @@ endstruc
 %ifndef NET_SYMBOLS
 section .text
     extern server_init
+    extern print_ip_port
+    extern server_main_loop
 
 section .bss
     extern server

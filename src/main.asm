@@ -47,10 +47,14 @@ main: ; () -> int
     mov dil, 10 ; newline
     call putchar
 
-    mov rax, 0 ; exit with code 0 (success)
+    lea rax, [server_callback]
+    call server_main_loop
 
     ; exit the stack frame
     mov rsp, rbp
     pop rbp
 
+    ret
+
+server_callback:
     ret
