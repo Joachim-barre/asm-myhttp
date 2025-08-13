@@ -80,9 +80,8 @@ print_ip_port: ; (i32 ip, i16 port)
 .ip_loop:
     inc word [rbp-8]
     movzx rax, word [rbp-8]
-    neg rax
 
-    movzx edi, byte [rbp+rax]
+    movzx edi, byte [rbp+rax-5]
     call printi
 
     cmp word [rbp-8], 4
