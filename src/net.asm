@@ -155,6 +155,7 @@ server_child_handler: ; (u64 fd (zero extended))
     mov edi, [rbp-28] ; fd=fd
     lea rsi, [rbp-16] ; sockaddr=&sockaddr
     lea rdx, [rbp-24] ; len=&len
+    syscall
 
     ; log the request
     lea rdi, [connection_msg]
