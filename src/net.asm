@@ -1,6 +1,7 @@
 %define NET_SYMBOLS
 %include "net.inc"
 %include "helpers.inc"
+%include "thread.inc"
 
 section .bss
     global server
@@ -110,50 +111,50 @@ server_main_loop: ; (callback(i32 sockfd, *SockAddr))
     push rbp
     mov rbp, rsp
 
-    sub rsp, 32 ; make space for vars
-    ; [rbp-16] sock_addr
-    ; [rbp-24] len in parent and fd in child
-    ; [rbp-32] callback
-
     mov rax, 50 ; sys_listen
     mov edi, [server+Server.sockfd] ; fd=server->sockfd
     mov esi, 5 ; backlog of 5 packets
     syscall
 
 .loop:
-    mov qword [rbp-24], 16 ; len = 16
-
     mov rax, 43 ; sys_accept
     mov edi, [server+Server.sockfd] ;fd=server->sockfd
-    lea rsi, [rbp-16] ; addr=&sock_addr
-    lea rdx, [rbp-24] ; len=&len
+    mov rsi, 0 ; addr=Null
+    mov rdx, 0 ; len=Null
     syscall
 
     test eax, eax
     js .exit
 
-    mov [rbp-24], eax ; save fd
+    ; start a thread for the callback
+    lea rdi, [server_child_handler]
+    mov rsi, rax
+    call thread_init
 
-    ; start a child for the callback
-    mov rax, 57 ; sys_fork
-    syscall
-
-    test eax, eax ; pid is zero only for child
-    jz .child
-
-    ; parent process :
-    ; close the connection socket and loop again
-    mov rax, 3 ; sys_close
-    mov edi, [rbp-24] ; fd=fd
-    syscall 
+    ; parent process : loop again
 
     jmp .loop
 
-.child:
-    ; close main server socket
-    mov rax, 3 ; sys_close
-    mov rdi, [server+Server.sockfd] ; fd=server->sockfd
-    syscall
+.exit:
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
+server_child_handler: ; (u64 fd (zero extended))
+    push rbp
+    mov rsp, rbp
+
+    sub rsp, 32 ; make room for vars
+    ; [rbp-16]=sockaddr
+    mov qword [rbp-24], 16 ; [rbp-24]=len
+    mov [rbp-28], edi ; [rbp-28]=fd
+
+    ; read the sockaddr
+    mov rax, 51 ; sys_getsockname
+    mov edi, [rbp-28] ; fd=fd
+    lea rsi, [rbp-16] ; sockaddr=&sockaddr
+    lea rdx, [rbp-24] ; len=&len
 
     ; log the request
     lea rdi, [connection_msg]
@@ -169,16 +170,11 @@ server_main_loop: ; (callback(i32 sockfd, *SockAddr))
     ; call the callback
     mov edi, [rbp-24]
     lea rsi, [rbp-16]
-    mov rax, [rbp-32]
+    mov rax, [rbp-32] ; TODO: pass callback
     call [rax]
 
-    ; callback ended exit child 
-    mov rax, 60 ; sys_exit
-    mov rdi, 0
-    syscall
-
-.exit:
     mov rsp, rbp
     pop rbp
 
     ret
+    
