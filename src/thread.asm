@@ -99,6 +99,11 @@ thread_init: ; (startup_fn(u64), u64 callback_arg)
 
     call rax ; call the child
 
+    mov rax, 11
+    lea rdi, [rsp+16-thread_stack_size] ; rax is the first page of the mapping
+    mov rsi, thread_stack_size
+    syscall
+
     mov rax, 60 ; sys_exit
     mov rdi, 0
     syscall ; exit when the child return
