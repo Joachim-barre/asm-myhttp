@@ -143,7 +143,7 @@ server_main_loop: ; (callback(i32 sockfd, *SockAddr))
 
 server_child_handler: ; (u64 fd (zero extended))
     push rbp
-    mov rsp, rbp
+    mov rbp, rsp
 
     sub rsp, 32 ; make room for vars
     ; [rbp-16]=sockaddr
