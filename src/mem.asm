@@ -408,11 +408,19 @@ free: ; (void*)
     
     ; try to merge this block with the next one
     mov rsi, [rdi+BlockHeader.next]
+    test rsi, rsi
+    jz .no_next
+
     call try_merge
+
+.no_next:
 
     ; try to merge it with the previous one
     mov rsi, [rbp-8]
     mov rdi, [rsi+BlockHeader.prev]
+    test rdi, rdi
+    jz .exit
+
     call try_merge
 
 .exit:
