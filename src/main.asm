@@ -1,5 +1,6 @@
 %include "helpers.inc"
 %include "net.inc"
+%include "heap.inc"
 
 section .data
     start_msg: db "starting the server", 10, 0
@@ -23,6 +24,8 @@ main: ; () -> int
 
     sub rsp, 16 ; 16 bytes for variables
     ; [rbp-8] server
+
+    call heap_init
 
     mov rdi, start_msg
     call print
