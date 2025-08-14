@@ -99,6 +99,22 @@ http_handler: ; (u32 fd)
     mov [rbp-56+HttpRequest.path], rdi
     add [rbp-64], rax, ; save the offset
 
+    ; read the ver
+    mov rdi, [rbp-16]
+    add rdi, [rbp-64]
+    mov rsi, [rbp-72]
+    sub rsi, rax ; substract the offset from the size
+    mov dl, ' '
+    call find_char
+
+    ; put a zero where there was a space
+    mov rdi, [rbp-16]
+    add rdi, [rbp-64]
+    mov byte [rdi+rax], 0
+
+    mov [rbp-56+HttpRequest.path], rdi
+    add [rbp-64], rax, ; save the offset
+
     ; TODO: parse the rest
 
     ; log request
