@@ -161,7 +161,7 @@ alloc_heap_pages: ; (BlockHeader* last, u64 min_size) -> BlockHeader*
     ; rax=header
     mov rdi, [rbp-8] ; i=last
 .loop:
-    cmp rax, rdi
+    cmp rdi, rax
     jb .found; i is the block before rax
 
     mov rsi, [rdi+BlockHeader.prev] ; get the previous block
@@ -173,7 +173,7 @@ alloc_heap_pages: ; (BlockHeader* last, u64 min_size) -> BlockHeader*
 
 .first:
     mov [rdi+BlockHeader.prev], rax
-    mov [rax+BlockHeader.next], rax
+    mov [rax+BlockHeader.next], rdi
     mov [heap+SpinLock.ptr], rax ; save this node as the first
     
     mov rsi, rdi
@@ -224,7 +224,7 @@ try_merge: ; (BlockHeader* first, BlockHeader* second) -> BlockHeader*
 
     ; check if the block are continuous
     mov rdi, [rax+BlockHeader.len]
-    add rdi, BlockHeader.size
+    lea rdi, [rax+BlockHeader.size+rdi]
     cmp rdi, rsi
     jne .exit
 
@@ -288,6 +288,7 @@ try_split_block: ; (BlockHeader*, u64 len) -> (BlockHeader*, BlockHeader*)
     
     ; initialize the second block
     lea rdi, [rax+rsi+BlockHeader.size] ; second_block=first_block+first_block->len+sizeof(BlockHeader)
+    neg rsi
     lea rsi, [rdx-BlockHeader.size+rsi] ; len=old_len-sizeof(BlockHeader)-new_len
     call init_block
 
