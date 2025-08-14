@@ -6,6 +6,9 @@
 section .data
     start_msg: db "starting the server", 10, 0
     port_msg: db "port : ", 0
+    get_str: db "GET", 0
+    bad_request_str: db "Bad Request", 0
+    bad_request_body: db "403 Bad Request", 0
 
 section .text
     global _start
@@ -33,6 +36,7 @@ main: ; () -> int
 
     mov di, 0 ; let the os choose the port
     mov esi, 0 ; all interfaces
+    lea rdx, [request_handler]
     call http_init
 
     mov [rbp-8], rax
@@ -58,5 +62,36 @@ main: ; () -> int
 
     ret
 
-server_callback:
+request_handler: ; (i32 fd, HttpRequest*)
+    push rbp
+    mov rbp, rsp
+
+    sub rsp, 48 ; make room for vars
+    mov [rbp-8], rsi ; [rbp-8]=request
+    mov [rbp-12], edi ; [rbp-12]=fd
+    ; [rbp-48] responce
+
+    lea rdi, [get_str]
+    lea rsi, [rsi+HttpRequest.method]
+    call strcmp
+
+    test eax, eax
+    jnz .bad_request
+
+    ; TODO
+    jmp .bad_request
+
+.bad_request:
+    mov dword [rbp-48+HttpResponce.status_code], 400
+    mov qword [rbp-48+HttpResponce.status_str], bad_request_str
+    mov qword [rbp-48+HttpResponce.headers], 0
+    mov qword [rbp-48+HttpResponce.body], bad_request_body
+
+    mov edi, [rbp-12]
+    lea rsi, [rbp-48]
+    call http_send_responce
+
+    mov rsp, rbp
+    pop rbp
+
     ret
