@@ -6,6 +6,8 @@ section .text
     global strlen
     global print
     global printi
+    global find_char
+    global memcpy
 
 strrev: 
 	push rbp
@@ -226,3 +228,26 @@ printi:
 	pop rbp
 	ret
 
+find_char: ; (char*, u64 len, char) -> u64
+	push rbp
+	mov rbp, rsp
+	sub rsp, 8
+	mov [rbp-8], rdi
+	
+	mov rcx, rsi
+	mov al, dl
+	repne scasb
+
+	sub rdi, [rbp-8]
+	lea rax, [rdi-1]
+
+	mov rsp, rbp
+	pop rbp
+
+	ret
+
+memcpy: ; (void*, void*, count)
+    mov rcx, rdx
+    rep movsq
+
+    ret

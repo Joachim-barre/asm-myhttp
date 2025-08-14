@@ -6,4 +6,6 @@ section .text:
     extern strlen ; (char*) -> u64
     extern print ; (char*)
     extern printi ; (i32)
+    extern find_char ; (char*, u64 len, char) -> u64
+    extern memcpy ; (void*, void*, u64 count)
 
