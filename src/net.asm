@@ -173,6 +173,11 @@ server_child_handler: ; (u64 fd (zero extended))
     mov rax, [server+Server.handler]
     call rax
 
+    ; close the connection
+    mov rax, 3 ; sys_close
+    mov edi, [rbp-28] ; fd
+    syscall
+
     mov rsp, rbp
     pop rbp
 
