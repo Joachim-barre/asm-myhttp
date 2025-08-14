@@ -1,6 +1,6 @@
 %include "helpers.inc"
 %include "net.inc"
-%include "heap.inc"
+%include "mem.inc"
 
 section .data
     start_msg: db "starting the server", 10, 0
