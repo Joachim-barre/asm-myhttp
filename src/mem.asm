@@ -389,6 +389,9 @@ free: ; (void*)
     push rbp
     mov rbp, rsp
 
+    test rdi, rdi
+    jz .exit_no_lock
+
     ; get the address of the header
     sub rdi, BlockHeader.size
 
@@ -416,6 +419,7 @@ free: ; (void*)
     lea rdi, [heap]
     call spin_unlock
 
+.exit_no_lock:
     mov rsp, rbp
     pop rbp
 
