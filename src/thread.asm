@@ -8,6 +8,7 @@ section .data
 
 section .text
     global thread_init
+    global spin_init
     global spin_lock
     global spin_unlock
 
