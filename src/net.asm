@@ -20,11 +20,13 @@ section .text
 
 ; initalise the server
 ; port must be in big endian
-server_init: ; (u16 port, u32 addr) -> Server*
+server_init: ; (u16 port, u32 addr, handler(u32 fd)) -> Server*
     push rbp
     mov rbp, rsp
 
     sub rsp, 16 ; make room for 16 bytes of variables
+
+    mov [server + Server.handler], rdx
 
     mov dword [server_addr + SockAddr.familly], 2 ; ipv4
     mov [server_addr + SockAddr.port], di
@@ -106,7 +108,7 @@ print_ip_port: ; (i32 ip, i16 port)
 
 ; listen to incoming connection and call the callback in a child process when a connection start
 ; returns only on error
-server_main_loop: ; (callback(i32 sockfd, *SockAddr))
+server_main_loop:
     push rbp
     mov rbp, rsp
 
@@ -167,7 +169,9 @@ server_child_handler: ; (u64 fd (zero extended))
     mov dil, 10
     call putchar
 
-    ; TODO: callback
+    mov edi, [rbp-28]
+    mov rax, [server+Server.handler]
+    call rax
 
     mov rsp, rbp
     pop rbp

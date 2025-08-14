@@ -1,5 +1,6 @@
 %include "helpers.inc"
 %include "net.inc"
+%include "http.inc"
 %include "mem.inc"
 
 section .data
@@ -32,15 +33,14 @@ main: ; () -> int
 
     mov di, 0 ; let the os choose the port
     mov esi, 0 ; all interfaces
-    call server_init
+    call http_init
 
     mov [rbp-8], rax
 
     lea rdi, [port_msg]
     call print
 
-    mov rdi, [rbp-8]
-    mov rdi, [rdi+Server.addr]
+    mov rdi, [server+Server.addr]
     mov ax, [rdi+SockAddr.port]
     
     xchg ah, al ; swap the endianess
@@ -50,8 +50,7 @@ main: ; () -> int
     mov dil, 10 ; newline
     call putchar
 
-    lea rax, [server_callback]
-    call server_main_loop
+    call http_main_loop
 
     ; exit the stack frame
     mov rsp, rbp

@@ -8,7 +8,9 @@ endstruc
 
 struc Server
     .addr: resq 1
+    .handler: resq 1
     .sockfd: resd 1
+    .pad: resb 4
     .size:
 endstruc
 

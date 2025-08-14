@@ -1,6 +1,6 @@
 BUILDDIR=build
 PROG=$(BUILDDIR)/prog
-OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/helpers.o $(BUILDDIR)/net.o $(BUILDDIR)/thread.o $(BUILDDIR)/mem.o
+OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/helpers.o $(BUILDDIR)/net.o $(BUILDDIR)/thread.o $(BUILDDIR)/mem.o $(BUILDDIR)/http.o
 
 LD=ld
 LDFLAGS=
