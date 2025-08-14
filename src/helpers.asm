@@ -8,6 +8,7 @@ section .text
     global printi
     global find_char
     global memcpy
+    global strcmp
 
 strrev: 
 	push rbp
@@ -251,3 +252,32 @@ memcpy: ; (void*, void*, count)
     rep movsq
 
     ret
+
+strcmp: ; (char*, char*) -> i32
+    push rbp
+    mov rbp, rsp
+    
+.loop:
+    mov al, byte [rdi]
+    sub al, [rsi]
+    jnz .no_eq
+
+    test al, al
+    jz .end
+    
+    inc rdi
+    inc rsi
+
+.end:
+    mov rax, 0
+    jmp .exit
+
+.no_eq:
+    movzx eax, al
+
+.exit:
+    mov rsp, rbp
+    pop rbp
+
+    ret
+

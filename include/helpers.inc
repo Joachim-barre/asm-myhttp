@@ -8,4 +8,6 @@ section .text:
     extern printi ; (i32)
     extern find_char ; (char*, u64 len, char) -> u64
     extern memcpy ; (void*, void*, u64 count)
+    extern strcmp ; (char*, char*) -> i32
+
 
