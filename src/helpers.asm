@@ -248,8 +248,9 @@ find_char: ; (char*, u64 len, char) -> u64
 	ret
 
 memcpy: ; (void*, void*, count)
+    cld
     mov rcx, rdx
-    rep movsq
+    rep movsb
 
     ret
 
