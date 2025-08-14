@@ -7,7 +7,7 @@ section .text:
     extern print ; (char*)
     extern printi ; (i32)
     extern find_char ; (char*, u64 len, char) -> u64
-    extern memcpy ; (void*, void*, u64 count)
+    extern memcpy ; (void* dest, void* src, u64 count)
     extern strcmp ; (char*, char*) -> i32
 
 
