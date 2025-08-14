@@ -1,7 +1,7 @@
 section .text
     global strrev
     global int_abs
-    global itoa
+    global itos
     global putchar
     global strlen
     global print
