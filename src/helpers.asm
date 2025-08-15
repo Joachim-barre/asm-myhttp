@@ -263,11 +263,14 @@ strcmp: ; (char*, char*) -> i32
     sub al, [rsi]
     jnz .no_eq
 
+    mov al, [rdi]
     test al, al
     jz .end
     
     inc rdi
     inc rsi
+
+    jmp .loop
 
 .end:
     mov rax, 0
