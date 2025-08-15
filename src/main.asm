@@ -72,7 +72,7 @@ request_handler: ; (i32 fd, HttpRequest*)
     ; [rbp-48] responce
 
     lea rdi, [get_str]
-    lea rsi, [rsi+HttpRequest.method]
+    mov rsi, [rsi+HttpRequest.method]
     call strcmp
 
     test eax, eax
