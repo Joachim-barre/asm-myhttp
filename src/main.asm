@@ -8,7 +8,7 @@ section .data
     port_msg: db "port : ", 0
     get_str: db "GET", 0
     bad_request_str: db "Bad Request", 0
-    bad_request_body: db "403 Bad Request", 0
+    bad_request_body: db "400 Bad Request", 0
 
 section .text
     global _start
