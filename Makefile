@@ -1,6 +1,7 @@
 BUILDDIR=build
 PROG=$(BUILDDIR)/prog
-OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/helpers.o $(BUILDDIR)/net.o $(BUILDDIR)/thread.o $(BUILDDIR)/mem.o $(BUILDDIR)/http.o
+OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/helpers.o $(BUILDDIR)/net.o $(BUILDDIR)/thread.o $(BUILDDIR)/mem.o $(BUILDDIR)/http.o $(BUILDDIR)/pages.o
+HTML_FILES=html/index.html
 
 LD=ld
 LDFLAGS=
@@ -22,6 +23,11 @@ $(BUILDDIR):
 
 $(BUILDDIR)/%.o: src/%.asm | $(BUILDDIR)
 	$(ASM) $(ASMFLAGS) $< -o $@
+
+$(BUILDDIR)/pages.o: src/pages.asm $(HTML_FILES) | $(BUILDDIR)
+	$(ASM) $(ASMFLAGS) $< -o $@
+
+	
 
 $(PROG): $(OBJS) | $(BUILDDIR)
 	$(LD) $(LDFLAGS) $(OBJS) -o $(PROG)

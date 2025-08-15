@@ -2,6 +2,7 @@
 %include "net.inc"
 %include "http.inc"
 %include "mem.inc"
+%include "pages.inc"
 
 section .data
     start_msg: db "starting the server", 10, 0
@@ -9,6 +10,9 @@ section .data
     get_str: db "GET", 0
     bad_request_str: db "Bad Request", 0
     bad_request_body: db "400 Bad Request", 0
+    not_found_str: db "Not Found", 0
+    not_found_body: db "404 Not Found", 0
+    ok_str: db "OK", 0
 
 section .text
     global _start
@@ -78,9 +82,34 @@ request_handler: ; (i32 fd, HttpRequest*)
     test eax, eax
     jnz .bad_request
 
-    ; TODO
-    jmp .bad_request
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+HttpRequest.path]
+    call find_page
 
+    test rax, rax
+    jz .not_found
+
+    mov dword [rbp-48+HttpResponce.status_code], 200
+    mov qword [rbp-48+HttpResponce.status_str], ok_str
+    mov qword [rbp-48+HttpResponce.headers], 0
+    mov qword [rbp-48+HttpResponce.body], rax
+
+    mov edi, [rbp-12]
+    lea rsi, [rbp-48]
+    call http_send_responce
+
+    jmp .exit
+.not_found:
+    mov dword [rbp-48+HttpResponce.status_code], 404
+    mov qword [rbp-48+HttpResponce.status_str], not_found_str
+    mov qword [rbp-48+HttpResponce.headers], 0
+    mov qword [rbp-48+HttpResponce.body], not_found_body
+
+    mov edi, [rbp-12]
+    lea rsi, [rbp-48]
+    call http_send_responce
+
+    jmp .exit
 .bad_request:
     mov dword [rbp-48+HttpResponce.status_code], 400
     mov qword [rbp-48+HttpResponce.status_str], bad_request_str
@@ -91,6 +120,7 @@ request_handler: ; (i32 fd, HttpRequest*)
     lea rsi, [rbp-48]
     call http_send_responce
 
+.exit:
     mov rsp, rbp
     pop rbp
 
