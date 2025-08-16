@@ -97,20 +97,6 @@ request_handler: ; (i32 fd, HttpRequest*)
     lea rsi, [rbp-48]
     call http_send_responce
 
-    jmp .exit
-.bad_request:
-    mov dword [rbp-48+HttpResponce.status_code], 400
-    mov qword [rbp-48+HttpResponce.status_str], bad_request_str
-    mov qword [rbp-48+HttpResponce.headers], 0
-    lea rax, [rbp-64]
-    mov qword [rbp-48+HttpResponce.body], rax
-    mov qword [rax+HttpBody.ptr], bad_request_body
-    mov qword [rax+HttpBody.len], bad_request_body.len
-
-    mov edi, [rbp-12]
-    lea rsi, [rbp-48]
-    call http_send_responce
-
 .exit:
     mov rsp, rbp
     pop rbp
