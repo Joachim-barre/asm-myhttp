@@ -65,13 +65,16 @@ http_handler: ; (u32 fd)
     mov rax, 0 ; sys_read
     mov edi, [rbp-8] ; fd
     mov rsi, [rbp-16] ; buf
-    mov rdx, 1024 ; len
+    mov rdx, 1023 ; len-1 to store a zero at the end
     syscall
 
     test rax, rax
     js .error
 
     mov [rbp-72], rax ; save buf_len
+    ; null terminate the buf
+    mov rdi, [rbp-16]
+    mov byte [rdi+rax], 0
 
     ; parse status line
     
@@ -121,7 +124,34 @@ http_handler: ; (u32 fd)
     mov [rbp-56+HttpRequest.ver], rdi
     add [rbp-64], rax, ; save the offset
 
-    ; TODO: parse the rest
+    inc qword [rbp-64] ; increase the offset to skip the new line
+
+.header_loop:
+    mov rdi, [rbp-16]
+    add rdi, [rbp-64]
+    cmp byte [rdi], `\r`
+    je .header_loop_end
+    
+    ; TODO : parse the headers
+
+    mov rdi, [rbp-16]
+    add rdi, [rbp-64]
+    mov rsi, [rbp-72]
+    sub rsi, rax ; substract the offset from the size
+    mov dl, `\r`
+    call find_char
+
+    add [rbp-64], rax
+    add qword [rbp-64], 2
+
+    jmp .header_loop
+    
+.header_loop_end:
+    add qword [rbp-64], 2
+    mov rdi, [rbp-16]
+    add rdi, [rbp-64]
+    
+    mov [rbp-56+HttpRequest.body], rdi
 
     ; log request
     mov rdi, recived_msg
