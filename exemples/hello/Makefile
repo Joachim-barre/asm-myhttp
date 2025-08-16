@@ -4,7 +4,7 @@ LIB=$(LIB_BUILD)/libmyhttp.a
 BUILDDIR=build
 PROG=$(BUILDDIR)/prog
 OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/pages.o
-HTML_FILES=html/index.html
+PAGES=html/index.html static/index.css
 
 LD=ld
 LDFLAGS=
@@ -27,7 +27,7 @@ $(BUILDDIR):
 $(BUILDDIR)/%.o: src/%.asm | $(BUILDDIR)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
-$(BUILDDIR)/pages.o: src/pages.asm $(HTML_FILES) | $(BUILDDIR)
+$(BUILDDIR)/pages.o: src/pages.asm $(PAGES) | $(BUILDDIR)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 $(PROG): $(OBJS) $(LIB) | $(BUILDDIR)
