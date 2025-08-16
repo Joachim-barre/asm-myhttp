@@ -4,8 +4,10 @@ section .text
     global encode
     global decode
 
-encode: ; TODO
+encode: ; (HttpRequest*, int fd)
+    ;  TODO
     ret
 
-decode: ; TODO
+decode: ; (HttpRequest*, int fd)
+    ; TODO
     ret
