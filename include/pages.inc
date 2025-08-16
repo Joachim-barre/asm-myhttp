@@ -24,6 +24,18 @@ endstruc
     db 0
 %endmacro
 
+; (name, method, http_path, function)
+%macro PAGE_CALLBACK 4
+    %1: istruc Page 
+        at Page.path, dq .path
+        at Page.method, dq .method
+        at Page.kind, dq 2
+        at Page.data0, dq %4
+    iend
+    .method: db %2, 0
+    .path: db %3, 0
+%endmacro
+
 %ifndef PAGES_SYMBOLS
 section .text
     extern find_page
