@@ -111,7 +111,7 @@ find_page: ; (HttpRequest*, int fd) -> bool
     mov rax, [rdi+Page.data0]
     mov rdi, [rbp-24]
     mov esi, [rbp-30]
-    call [rax]
+    call rax
 
     mov rax, 1
     jmp .exit
