@@ -6,7 +6,7 @@ document.getElementById("encode").addEventListener("submit", function (event) {
     // Use AJAX to send the form data to the server
     fetch("/encode", {
         method: "POST",
-            body: formData
+            body: formData.get("to_encode")
         })
         .then(response => response.text())
         .then(data => {
@@ -26,7 +26,7 @@ document.getElementById("decode").addEventListener("submit", function (event) {
     // Use AJAX to send the form data to the server
     fetch("/decode", {
         method: "POST",
-            body: formData
+            body: formData.get("to_decode")
         })
         .then(response => response.text())
         .then(data => {
