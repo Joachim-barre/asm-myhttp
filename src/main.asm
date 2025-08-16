@@ -9,10 +9,11 @@ section .data
     port_msg: db "port : ", 0
     get_str: db "GET", 0
     bad_request_str: db "Bad Request", 0
-    bad_request_body: db "400 Bad Request", 0
+    bad_request_body: db "400 Bad Request"
+        .len equ $- bad_request_body
     not_found_str: db "Not Found", 0
-    not_found_body: db "404 Not Found", 0
-    ok_str: db "OK", 0
+    not_found_body: db "404 Not Found"
+        .len equ $- not_found_body
 
 section .text
     global _start
@@ -70,10 +71,11 @@ request_handler: ; (i32 fd, HttpRequest*)
     push rbp
     mov rbp, rsp
 
-    sub rsp, 48 ; make room for vars
+    sub rsp, 64 ; make room for vars
     mov [rbp-8], rsi ; [rbp-8]=request
     mov [rbp-12], edi ; [rbp-12]=fd
     ; [rbp-48] responce
+    ; [rbp-64] body
 
     lea rdi, [get_str]
     mov rsi, [rsi+HttpRequest.method]
@@ -84,26 +86,22 @@ request_handler: ; (i32 fd, HttpRequest*)
 
     mov rdi, [rbp-8]
     mov rdi, [rdi+HttpRequest.path]
+    mov rsi, [rbp-8]
+    mov rdx, [rbp-12]
     call find_page
 
     test rax, rax
     jz .not_found
-
-    mov dword [rbp-48+HttpResponce.status_code], 200
-    mov qword [rbp-48+HttpResponce.status_str], ok_str
-    mov qword [rbp-48+HttpResponce.headers], 0
-    mov qword [rbp-48+HttpResponce.body], rax
-
-    mov edi, [rbp-12]
-    lea rsi, [rbp-48]
-    call http_send_responce
 
     jmp .exit
 .not_found:
     mov dword [rbp-48+HttpResponce.status_code], 404
     mov qword [rbp-48+HttpResponce.status_str], not_found_str
     mov qword [rbp-48+HttpResponce.headers], 0
-    mov qword [rbp-48+HttpResponce.body], not_found_body
+    lea rax, [rbp-64]
+    mov qword [rbp-48+HttpResponce.body], rax
+    mov qword [rax+HttpBody.ptr], not_found_body
+    mov qword [rax+HttpBody.len], not_found_body.len
 
     mov edi, [rbp-12]
     lea rsi, [rbp-48]
@@ -114,7 +112,10 @@ request_handler: ; (i32 fd, HttpRequest*)
     mov dword [rbp-48+HttpResponce.status_code], 400
     mov qword [rbp-48+HttpResponce.status_str], bad_request_str
     mov qword [rbp-48+HttpResponce.headers], 0
-    mov qword [rbp-48+HttpResponce.body], bad_request_body
+    lea rax, [rbp-64]
+    mov qword [rbp-48+HttpResponce.body], rax
+    mov qword [rax+HttpBody.ptr], bad_request_body
+    mov qword [rax+HttpBody.len], bad_request_body.len
 
     mov edi, [rbp-12]
     lea rsi, [rbp-48]

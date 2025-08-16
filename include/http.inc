@@ -5,7 +5,7 @@ struc HttpRequest
     .path: resq 1 ; char *
     .ver: resq 1 ; char *
     .headers: resq 1 ; char**
-    .body : resq 1 ; char*
+    .body : resq 1 ; HttpBody*
     .size: ; should stay 40
 endstruc
 
@@ -14,8 +14,14 @@ struc HttpResponce
     .pad: resd 1
     .status_str : resq 1 ; char*
     .headers: resq 1 ; char**
-    .body: resq 1 ; char*
+    .body: resq 1 ; HttpBody*
     .size: ; should stay 32
+endstruc
+
+struc HttpBody
+    .ptr: resq 1
+    .len: resq 1
+    .size: ; should stay 16
 endstruc
 
 %ifndef HTTP_SYMBOLS

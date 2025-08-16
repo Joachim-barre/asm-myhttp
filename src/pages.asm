@@ -1,20 +1,35 @@
 %define PAGES_SYMBOLS
 %include "pages.inc"
 %include "helpers.inc"
+%include "http.inc"
 
 section .data
     extern pages
 
+    ok_str: db "OK", 0
+
+
+    find_page_jmp_tbl:
+        dq find_page.kind_str
+        dq find_page.kind_bin
+        dq find_page.kind_fn
+
 section .text
     global find_page
 
-find_page: ; (char* path) -> char*
+; find a page and execute a callback
+; return true if found
+find_page: ; (char* path, HttpRequest*, int fd) -> bool
     push rbp
     mov rbp, rsp
 
-    sub rsp, 16 ; make rooms for vars
+    sub rsp, 80 ; make rooms for vars
     mov qword [rbp-8], pages ; [rbp-8]=i
     mov [rbp-16], rdi ; [rbp-16]=path
+    mov [rbp-24], rsi ; [rbp-24]=req
+    mov [rbp-30], edx ; [rbp-30]=fd
+    ; [rbp-64]=responce
+    ; [rbp-80]=body
 
 .loop:
     mov rdi, [rbp-8]
@@ -33,9 +48,60 @@ find_page: ; (char* path) -> char*
     jmp .loop
   
 .found:
-    mov rax, [rbp-8]
-    mov rax, [rax]
-    mov rax, [rax+Page.data]
+    mov rdi, [rbp-8]
+    mov rdi, [rdi]
+    mov rax, [rdi+Page.kind]
+    cmp rax, 3
+    jae .not_found ; ignore page if kind is invalid
+    mov rsi, [find_page_jmp_tbl+rax*8]
+    jmp rsi
+
+.kind_str: 
+    mov dword [rbp-64+HttpResponce.status_code], 200
+    mov qword [rbp-64+HttpResponce.status_str], ok_str
+    mov qword [rbp-64+HttpResponce.headers], 0
+    lea rax, [rbp-80]
+    mov qword [rbp-64+HttpResponce.body], rax
+    mov rsi, [rdi+Page.data0]
+    mov [rax+HttpBody.ptr], rsi
+    
+    mov rdi, rsi
+    call strlen
+
+    mov [rbp-80+HttpBody.len], rax
+
+    mov edi, [rbp-30]
+    lea rsi, [rbp-64]
+    call http_send_responce
+
+    mov rax, 1
+    jmp .exit
+    
+.kind_bin:
+    mov dword [rbp-64+HttpResponce.status_code], 200
+    mov qword [rbp-64+HttpResponce.status_str], ok_str
+    mov qword [rbp-64+HttpResponce.headers], 0
+    lea rax, [rbp-80]
+    mov qword [rbp-64+HttpResponce.body], rax
+    mov rsi, [rdi+Page.data0]
+    mov [rax+HttpBody.ptr], rsi
+    mov rsi, [rdi+Page.data1]
+    mov [rax+HttpBody.len], rsi
+
+    mov edi, [rbp-30]
+    lea rsi, [rbp-64]
+    call http_send_responce
+
+    mov rax, 1
+    jmp .exit
+
+.kind_fn:
+    mov rax, [rdi+Page.data0]
+    mov rdi, [rbp-24]
+    mov esi, [rbp-30]
+    call [rax]
+
+    mov rax, 1
     jmp .exit
 
 .not_found:

@@ -7,7 +7,8 @@ section .data
 
     index: istruc Page
         at Page.path, dq index_path
-        at Page.data, dq index_data
+        at Page.kind, dq 0
+        at Page.data0, dq index_data
     iend
 
     index_path: db "/", 0

@@ -225,8 +225,7 @@ http_send_responce: ; (u32 fd, HttpResponce*)
     test rdi, rdi
     jz .no_body_len
 
-    call strlen
-
+    mov rax, [rdi+HttpBody.len]
     add [rbp-40], rax
 
     add qword [rbp-40], 2 ; add the lenght of the crlf before the body
@@ -310,20 +309,19 @@ http_send_responce: ; (u32 fd, HttpResponce*)
     jmp .header_str_loop
 
 .no_headers_str:
-    mov rdi, [rbp-32]
-    mov rdi, [rdi+HttpResponce.body]
-    test rdi, rdi
+    mov rdx, [rbp-32]
+    mov rdx, [rdx+HttpResponce.body]
+    test rdx, rdx
     jz .no_body_str
 
-    call strlen
+    mov rax, [rdx+HttpBody.len]
 
     mov rdi, [rbp-64]
     mov word [rdi], `\r\n`
     add qword [rbp-64], 2
 
     mov rdi, [rbp-64]
-    mov rsi, [rbp-32]
-    mov rsi, [rsi+HttpResponce.body]
+    mov rsi, [rdx+HttpBody.ptr]
     mov rdx, rax
     add qword [rbp-64], rax
     call memcpy
