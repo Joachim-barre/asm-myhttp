@@ -6,7 +6,4 @@ endstruc
 %ifndef PAGES_SYMBOLS
 section .text
     extern find_page
-
-section .data
-    extern pages
 %endif

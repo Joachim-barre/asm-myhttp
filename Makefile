@@ -1,16 +1,15 @@
 BUILDDIR=build
-PROG=$(BUILDDIR)/prog
+LIB=$(BUILDDIR)/libmyhttp.a
 OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/helpers.o $(BUILDDIR)/net.o $(BUILDDIR)/thread.o $(BUILDDIR)/mem.o $(BUILDDIR)/http.o $(BUILDDIR)/pages.o
-HTML_FILES=html/index.html
 
-LD=ld
-LDFLAGS=
+AR=ar
+ARFLAGS=
 
 ASM=nasm
 ASMFLAGS=-f elf64 -Iinclude
 
-all: $(PROG)
-.PHONY: clean run
+all: $(LIB)
+.PHONY: clean
 
 clean:
 	rm -r $(BUILDDIR)
@@ -24,10 +23,7 @@ $(BUILDDIR):
 $(BUILDDIR)/%.o: src/%.asm | $(BUILDDIR)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
-$(BUILDDIR)/pages.o: src/pages.asm $(HTML_FILES) | $(BUILDDIR)
-	$(ASM) $(ASMFLAGS) $< -o $@
+$(LIB): $(OBJS) | $(BUILDDIR)
+	$(AR) $(ARFLAGS) rcs $(LIB) $(OBJS)
 
-	
-
-$(PROG): $(OBJS) | $(BUILDDIR)
-	$(LD) $(LDFLAGS) $(OBJS) -o $(PROG)
+TODO: build file for exemple/hello
