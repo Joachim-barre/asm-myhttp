@@ -43,8 +43,19 @@ find_page: ; (HttpRequest*, int fd) -> bool
     call strcmp
 
     test rax, rax
+    jnz .inc_pointer
+    
+    mov rdi, [rbp-8]
+    mov rdi, [rdi]
+    mov rdi, [rdi+Page.method]
+    mov rsi, [rbp-24]
+    mov rsi, [rsi+HttpRequest.method]
+    call strcmp
+
+    test rax, rax
     jz .found
 
+.inc_pointer:
     add qword [rbp-8], 8
     jmp .loop
   

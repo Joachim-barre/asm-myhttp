@@ -7,7 +7,6 @@
 section .data
     start_msg: db "starting the server", 10, 0
     port_msg: db "port : ", 0
-    get_str: db "GET", 0
     bad_request_str: db "Bad Request", 0
     bad_request_body: db "400 Bad Request"
         .len equ $- bad_request_body
@@ -76,13 +75,6 @@ request_handler: ; (i32 fd, HttpRequest*)
     mov [rbp-12], edi ; [rbp-12]=fd
     ; [rbp-48] responce
     ; [rbp-64] body
-
-    lea rdi, [get_str]
-    mov rsi, [rsi+HttpRequest.method]
-    call strcmp
-
-    test eax, eax
-    jnz .bad_request
 
     mov rdi, [rbp-8]
     mov rsi, [rbp-12]
