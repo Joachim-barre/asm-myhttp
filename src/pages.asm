@@ -19,15 +19,16 @@ section .text
 
 ; find a page and execute a callback
 ; return true if found
-find_page: ; (char* path, HttpRequest*, int fd) -> bool
+find_page: ; (HttpRequest*, int fd) -> bool
     push rbp
     mov rbp, rsp
 
     sub rsp, 80 ; make rooms for vars
     mov qword [rbp-8], pages ; [rbp-8]=i
-    mov [rbp-16], rdi ; [rbp-16]=path
-    mov [rbp-24], rsi ; [rbp-24]=req
-    mov [rbp-30], edx ; [rbp-30]=fd
+    mov rdx, [rdi+HttpRequest.path]
+    mov [rbp-16], rdx ; [rbp-16]=path
+    mov [rbp-24], rdi ; [rbp-24]=req
+    mov [rbp-30], esi ; [rbp-30]=fd
     ; [rbp-64]=responce
     ; [rbp-80]=body
 

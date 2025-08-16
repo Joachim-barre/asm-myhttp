@@ -85,9 +85,7 @@ request_handler: ; (i32 fd, HttpRequest*)
     jnz .bad_request
 
     mov rdi, [rbp-8]
-    mov rdi, [rdi+HttpRequest.path]
-    mov rsi, [rbp-8]
-    mov rdx, [rbp-12]
+    mov rsi, [rbp-12]
     call find_page
 
     test rax, rax
