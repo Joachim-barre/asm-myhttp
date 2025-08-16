@@ -9,6 +9,18 @@ struc Page
     .data1: resq 1 ; depends on kind
 endstruc
 
+; (name, http_path, file_path)
+%macro PAGE_FILE 3
+    %1: istruc Page 
+        at Page.path, dq .path
+        at Page.kind, dq 0
+        at Page.data0, dq .data
+    iend
+    .path: db %2, 0
+    .data: incbin %3
+    db 0
+%endmacro
+
 %ifndef PAGES_SYMBOLS
 section .text
     extern find_page
