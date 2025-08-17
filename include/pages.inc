@@ -24,6 +24,21 @@ endstruc
     db 0
 %endmacro
 
+; (name, method, http_path, file_path)
+%macro PAGE_FILE_BIN 4
+    %1: istruc Page 
+        at Page.path, dq .path
+        at Page.method, dq .method
+        at Page.kind, dq 1
+        at Page.data0, dq .data
+        at Page.data1, dq .len
+    iend
+    .method: db %2, 0
+    .path: db %3, 0
+    .data: incbin %4
+    .len equ $- .data
+%endmacro
+
 ; (name, method, http_path, function)
 %macro PAGE_CALLBACK 4
     %1: istruc Page 
