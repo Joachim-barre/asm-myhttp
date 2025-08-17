@@ -52,6 +52,7 @@ utf8_next_char: ; (char*) -> (u32, char*)
     jne .invalid
 
     mov eax, [rdi]
+    bswap eax
     lea rdx, [rdi+4]
     jmp .exit
 .3bytes:
