@@ -170,5 +170,77 @@ encode: ; (HttpRequest*, int fd)
     ret
 
 decode: ; (HttpRequest*, int fd)
-    ; TODO
+    push rbp
+    mov rbp, rsp
+
+    sub rsp, 64
+    ; [rbp-32] responce
+    ; [rbp-48] body
+    ; [rbp-56] str
+    mov dword [rbp-60], esi ; [rbp-60]=fd
+    mov dword [rbp-64], 0; [rbp-64]=body_offset
+
+    mov rdi, [rdi+HttpRequest.body]
+    mov rsi, [rdi+HttpBody.ptr]
+    mov [rbp-56], rsi
+
+    mov rdi, [rdi+HttpBody.len]
+    call malloc
+
+    mov [rbp-48+HttpBody.ptr], rax
+    mov dword [rbp-48+HttpBody.len], 0
+
+.loop:
+    mov rdi, [rbp-56]
+    call utf8_next_char
+    mov [rbp-56], rdx
+
+    test eax, eax
+    jz .end
+
+    mov ecx, eax
+    and ecx, 0xFFFFFCC0
+    cmp ecx, 0xf09f9480
+    je .decodable
+
+    mov al, '?'
+    mov rdi, [rbp-48+HttpBody.ptr]
+    mov esi, [rbp-64]
+    mov [rdi+rsi], al
+    inc dword [rbp-64]
+    
+    jmp .loop
+.decodable:
+    mov ecx, 0b00111111
+    and ecx, eax
+    and eax, 0b1100000000
+    shr eax, 2
+    or eax, ecx
+
+    mov rdi, [rbp-48+HttpBody.ptr]
+    mov esi, [rbp-64]
+    mov [rdi+rsi], al
+    inc dword [rbp-64]
+
+    jmp .loop
+.end:
+    mov dword [rbp-32+HttpResponce.status_code], 200
+    mov qword [rbp-32+HttpResponce.status_str], ok_str
+    mov qword [rbp-32+HttpResponce.headers], 0
+    lea rax, [rbp-48]
+    mov qword [rbp-32+HttpResponce.body], rax
+    mov edi, [rbp-64]
+    mov  [rax+HttpBody.len], rdi
+    
+    mov edi, [rbp-60]
+    lea rsi, [rbp-32]
+    call http_send_responce
+
+    mov rdi, [rbp-48+HttpBody.ptr]
+    call free
+
+    mov rsp, rbp
+    pop rbp
+    
     ret
+
