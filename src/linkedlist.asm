@@ -97,7 +97,7 @@ ll_push_front:
 
 .inserted:
     mov rdx, [rdi+LinkedList.item_size]
-    mov rdi, [rsi+LLNodeHeader.size]
+    lea rdi, [rax+LLNodeHeader.size]
     mov rsi, [rbp-16]
     call memcpy
 
@@ -133,7 +133,7 @@ ll_push_back:
 
 .inserted:
     mov rdx, [rdi+LinkedList.item_size]
-    mov rdi, [rsi+LLNodeHeader.size]
+    lea rdi, [rax+LLNodeHeader.size]
     mov rsi, [rbp-16]
     call memcpy
 
