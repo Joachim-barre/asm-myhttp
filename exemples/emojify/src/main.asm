@@ -1,5 +1,8 @@
 %include "http.inc"
 %include "mem.inc"
+%include "app.inc"
+
+APP_DEFAULT
 
 section .data
     ok_str: db "OK", 0
