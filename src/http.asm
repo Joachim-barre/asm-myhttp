@@ -47,12 +47,13 @@ http_handler: ; (u32 fd)
     push rbp
     mov rbp, rsp
 
-    sub rsp, 80
+    sub rsp, 96
     mov [rbp-8], rdi ; [rbp-8]=fd
     ; [rbp-16]=buf
     ; [rbp-56]=request
     ; [rbp-64]=offset
     ; [rbp-72]=buf_len
+    ; [rbp-96]=body
 
     mov rdi, 1024
     call malloc
@@ -137,7 +138,7 @@ http_handler: ; (u32 fd)
     mov rdi, [rbp-16]
     add rdi, [rbp-64]
     mov rsi, [rbp-72]
-    sub rsi, rax ; substract the offset from the size
+    sub rsi, [rbp-64] ; substract the offset from the size
     mov dl, `\r`
     call find_char
 
@@ -151,8 +152,22 @@ http_handler: ; (u32 fd)
     mov rdi, [rbp-16]
     add rdi, [rbp-64]
     
-    mov [rbp-56+HttpRequest.body], rdi
+    mov al, [rdi]
+    test al, al 
+    jz .no_body
 
+    lea rax, [rbp-96]
+    mov [rbp-56+HttpRequest.body], rax
+    mov [rax+HttpBody.ptr], rdi
+    mov rax, [rbp-72]
+    sub rax, [rbp-64] 
+    mov [rbp-96+HttpBody.len], rax
+    
+    jmp .body_parse_end
+.no_body:
+    mov qword [rbp-56+HttpRequest.body], 0
+
+.body_parse_end:
     ; log request
     mov rdi, recived_msg
     call print
