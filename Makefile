@@ -14,9 +14,6 @@ all: $(LIB)
 clean:
 	rm -r $(BUILDDIR)
 
-run: $(PROG)
-	chmod +x $(PROG) && ./$(PROG)
-
 $(BUILDDIR):
 	mkdir $(BUILDDIR)
 
