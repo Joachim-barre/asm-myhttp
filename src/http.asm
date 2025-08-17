@@ -20,7 +20,7 @@ section .text
     global http_main_loop
     global http_send_responce
 
-http_init: ; (u16 port, u32 address, handler(fd, HttpRequest)) -> HttpServer*
+http_init: ; (u16 port, u32 address, handler(fd, HttpRequest) -> bool) -> HttpServer*
     push rbp ; align the stack
 
     mov [handler], rdx
@@ -189,6 +189,8 @@ http_handler: ; (u32 fd)
     lea rsi, [rbp-56]
     call [handler]
 
+    test rax, rax
+    jnz .loop
     jmp .exit
 
 .error:

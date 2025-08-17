@@ -18,7 +18,8 @@ section .text
     global find_page
 
 ; find a page and execute a callback
-; return true if found
+; first returned value is true if found
+; the second is true if the connection should be kept alive
 find_page: ; (HttpRequest*, int fd) -> bool
     push rbp
     mov rbp, rsp
@@ -87,6 +88,7 @@ find_page: ; (HttpRequest*, int fd) -> bool
     call http_send_responce
 
     mov rax, 1
+    mov rdx, 1
     jmp .exit
     
 .kind_bin:
@@ -105,6 +107,7 @@ find_page: ; (HttpRequest*, int fd) -> bool
     call http_send_responce
 
     mov rax, 1
+    mov rdx, 1
     jmp .exit
 
 .kind_fn:
@@ -113,6 +116,7 @@ find_page: ; (HttpRequest*, int fd) -> bool
     mov esi, [rbp-30]
     call rax
 
+    mov rdx, rax
     mov rax, 1
     jmp .exit
 

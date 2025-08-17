@@ -71,7 +71,7 @@ main: ; () -> int
 
     ret
 
-request_handler: ; (i32 fd, HttpRequest*)
+request_handler: ; (i32 fd, HttpRequest*) -> bool
     push rbp
     mov rbp, rsp
 
@@ -88,6 +88,7 @@ request_handler: ; (i32 fd, HttpRequest*)
     test rax, rax
     jz .not_found
 
+    mov rax, rdx
     jmp .exit
 .not_found:
     mov dword [rbp-48+HttpResponce.status_code], 404
@@ -102,6 +103,7 @@ request_handler: ; (i32 fd, HttpRequest*)
     lea rsi, [rbp-48]
     call http_send_responce
 
+    xor rax, rax
 .exit:
     mov rsp, rbp
     pop rbp

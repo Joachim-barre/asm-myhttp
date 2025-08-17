@@ -4,7 +4,7 @@ struc Page
     ; kind specifiy what data is
     ; 0: data0 is a char* which has a len that can be computed with strlen, data1 is ignored
     ; 1: data0 is a char* raw binary data, data1 is it's length
-    ; 2: data0 is a pointer to a funcion with the signature : fn(HttpRequest*, int fd), data1 is ignored
+    ; 2: data0 is a pointer to a funcion with the signature : fn(HttpRequest*, int fd) -> bool, data1 is ignored and the return value is used to determine if the connection should be kept alive
     .kind: resq 1
     .data0: resq 1 ; void *
     .data1: resq 1 ; depends on kind

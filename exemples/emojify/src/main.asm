@@ -95,7 +95,7 @@ utf8_next_char: ; (char*) -> (u32, char*)
 
     ret
 
-encode: ; (HttpRequest*, int fd)
+encode: ; (HttpRequest*, int fd) -> bool
     push rbp
     mov rbp, rsp
 
@@ -166,6 +166,8 @@ encode: ; (HttpRequest*, int fd)
 
     mov rdi, [rbp-48+HttpBody.ptr]
     call free
+
+    mov eax, 1
 
     mov rsp, rbp
     pop rbp
@@ -241,6 +243,8 @@ decode: ; (HttpRequest*, int fd)
 
     mov rdi, [rbp-48+HttpBody.ptr]
     call free
+
+    mov eax, 1
 
     mov rsp, rbp
     pop rbp
