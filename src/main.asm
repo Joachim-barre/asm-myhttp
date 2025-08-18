@@ -10,7 +10,6 @@ section .data
 
     start_msg: db "starting the server", 10, 0
     port_msg: db "port : ", 0
-        .len equ $- bad_request_body
     not_found_str: db "Not Found", 0
     not_found_body: db "404 Not Found"
         .len equ $- not_found_body
