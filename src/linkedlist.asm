@@ -99,8 +99,10 @@ ll_push_front:
     mov rdx, [rdi+LinkedList.item_size]
     lea rdi, [rax+LLNodeHeader.size]
     mov rsi, [rbp-16]
+    test rsi, rsi
+    jz .exit
     call memcpy
-
+.exit:
     mov rsp, rbp
     pop rbp
 
@@ -135,8 +137,10 @@ ll_push_back:
     mov rdx, [rdi+LinkedList.item_size]
     lea rdi, [rax+LLNodeHeader.size]
     mov rsi, [rbp-16]
+    test rsi, rsi
+    jz .exit
     call memcpy
-
+.exit:
     mov rsp, rbp
     pop rbp
 
