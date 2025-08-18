@@ -231,16 +231,17 @@ ll_iter:
     ret
 
 ll_iter_next:
-    mov rax, [rdi+LLNodeHeader.next]
-    test rax, rax
+    test rdi, rdi
     jz .end
+
+    mov rax, [rdi+LLNodeHeader.next]
     
     lea rdx, [rdi+LLNodeHeader.size]
     
     ret
 
 .end:
-    mov rax, rdi
+    mov rax, 0
     xor rdx, rdx
 
     ret
