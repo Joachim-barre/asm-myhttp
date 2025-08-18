@@ -20,13 +20,13 @@ endstruc
     iend
 %endmacro
 
-; (name, item_size, next, prev)
+; (name, data, next, prev)
 %macro LL_STATIC_NODE 4
     %1: istruc LLNodeHeader
         at LLNodeHeader.next, dq %3
         at LLNodeHeader.prev, dq %4
     iend
-    times %2 db 0
+    %2
 %endmacro
 
 %ifndef LINKEDLIST_SYMBOLS
