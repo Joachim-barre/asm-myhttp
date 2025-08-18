@@ -85,7 +85,8 @@ find_page: ; (HttpRequest*, int fd) -> bool
 
     mov edi, [rbp-30]
     lea rsi, [rbp-64]
-    call http_send_responce
+    mov edx, 1
+    call send_with_default_headers
 
     mov rax, 1
     mov rdx, 1
@@ -104,7 +105,8 @@ find_page: ; (HttpRequest*, int fd) -> bool
 
     mov edi, [rbp-30]
     lea rsi, [rbp-64]
-    call http_send_responce
+    mov edx, 1
+    call send_with_default_headers
 
     mov rax, 1
     mov rdx, 1
