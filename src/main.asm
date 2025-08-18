@@ -18,7 +18,7 @@ section .data
     not_found_str: db "Not Found", 0
     not_found_body: db NOT_FOUND_BODY
         .len equ NOT_FOUND_BODY_LEN
-        .len_str db %str(NOT_FOUND_BODY_LEN)
+        .len_str db %str(NOT_FOUND_BODY_LEN), 0
 
     LL_STATIC not_found_headers, HttpHeader.size, not_found_content_lenght, not_found_connection
     LL_STATIC_NODE not_found_content_lenght, , not_found_connection, 0
