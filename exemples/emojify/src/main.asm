@@ -162,7 +162,7 @@ encode: ; (HttpRequest*, int fd) -> bool
     
     mov edi, [rbp-60]
     lea rsi, [rbp-32]
-    call http_send_responce
+    call [app+App.send_wrapper]
 
     mov rdi, [rbp-48+HttpBody.ptr]
     call free
@@ -239,7 +239,7 @@ decode: ; (HttpRequest*, int fd)
     
     mov edi, [rbp-60]
     lea rsi, [rbp-32]
-    call http_send_responce
+    call [app+App.send_wrapper]
 
     mov rdi, [rbp-48+HttpBody.ptr]
     call free
