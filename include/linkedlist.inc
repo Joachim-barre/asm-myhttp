@@ -21,6 +21,7 @@ endstruc
 %endmacro
 
 ; (name, data, next, prev)
+; if you want you can pass nothing into the data argument and specify the data as the next line
 %macro LL_STATIC_NODE 4
     %1: istruc LLNodeHeader
         at LLNodeHeader.next, dq %3
