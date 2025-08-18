@@ -3,6 +3,7 @@
 %include "net.inc"
 %include "mem.inc"
 %include "helpers.inc"
+%include "linkedlist.inc"
 
 section .bss
     global http_server
@@ -211,7 +212,7 @@ http_send_responce: ; (u32 fd, HttpResponce*)
     push rbp
     mov rbp, rsp
 
-    sub rsp, 64 ; make room for vars
+    sub rsp, 80 ; make room for vars
     ; [rbp-16] atoi buffer
     mov [rbp-20], rdi; [rbp-20]=fd
     mov [rbp-32], rsi; [rbp-32]=responce
@@ -219,6 +220,7 @@ http_send_responce: ; (u32 fd, HttpResponce*)
     ; [rbp-48]=i
     ; [rbp-56]=buf
     ; [rbp-64]=buf_ptr (offseted)
+    ; [rbp-72]=current_header
 
     ; convert code to string
     lea rdi, [rbp-16]
@@ -248,22 +250,34 @@ http_send_responce: ; (u32 fd, HttpResponce*)
     test rdi, rdi
     jz .no_headers_len
 
-    mov qword [rbp-48], 0
-
-.header_len_loop:
-    mov rdi, [rbp-32]
-    mov rdi, [rdi+HttpResponce.headers]
-    mov rsi, [rbp-48]
-    mov rdi, [rdi+rsi*8]
-    test rdi, rdi
+    mov qword [rbp-48], rdi
+    
+    call ll_is_empty
+    test rax, rax
     jz .no_headers_len
 
+    mov qword [rbp-48], rdi
+    call ll_iter
+    mov qword [rbp-48], rax
+
+.header_len_loop:
+    mov rdi, [rbp-48]
+    call ll_iter_next
+    mov [rbp-48], rax
+    mov [rbp-72], rdx
+    test rdx, rdx
+    jz .no_headers_len
+
+    mov rdi, [rdx+HttpHeader.field]
     call strlen
     add [rbp-40], rax
 
-    add qword [rbp-40], 2 ; add the lenght for the crlf
-    
-    inc qword [rbp-48]
+    mov rdx, [rbp-72]
+    mov rdi, [rdx+HttpHeader.value]
+    call strlen
+    add [rbp-40], rax
+
+    add qword [rbp-40], 4 ; add the lenght for the crlf and the space and colon
     jmp .header_len_loop
 
 .no_headers_len:
@@ -327,23 +341,46 @@ http_send_responce: ; (u32 fd, HttpResponce*)
     test rdi, rdi
     jz .no_headers_str
 
-    mov qword [rbp-48], 0
-
-.header_str_loop:
-    mov rdi, [rbp-32]
-    mov rdi, [rdi+HttpResponce.headers]
-    mov rsi, [rbp-48]
-    mov rdi, [rdi+rsi*8]
-    test rdi, rdi
+    mov qword [rbp-48], rdi
+    
+    call ll_is_empty
+    test rax, rax
     jz .no_headers_str
 
+    mov qword [rbp-48], rdi
+    call ll_iter
+    mov qword [rbp-48], rax
+
+.header_str_loop:
+    mov rdi, [rbp-48]
+    call ll_iter_next
+    mov [rbp-48], rax
+    mov [rbp-72], rdx
+    test rdx, rdx
+    jz .no_headers_str
+
+    mov rdi, [rdx+HttpHeader.field]
+    call strlen
+
+    mov rdi, [rbp-64]
+    mov rsi, [rbp-72]
+    mov rsi, [rsi+HttpHeader.field]
+    mov rdx, rax
+    add qword [rbp-64], rax
+    call memcpy
+
+    mov rdi, [rbp-64]
+    mov word [rdi], `: `
+    add qword [rbp-64], 2
+
+
+    mov rdx, [rbp-72]
+    mov rdi, [rdx+HttpHeader.value]
     call strlen
     
     mov rdi, [rbp-64]
-    mov rsi, [rbp-32]
-    mov rsi, [rsi+HttpResponce.headers]
-    mov rdx, [rbp-48]
-    mov rsi, [rsi+rdx*8]
+    mov rsi, [rbp-72]
+    mov rsi, [rsi+HttpHeader.value]
     mov rdx, rax
     add qword [rbp-64], rax
     call memcpy
@@ -351,10 +388,10 @@ http_send_responce: ; (u32 fd, HttpResponce*)
     mov rdi, [rbp-64]
     mov word [rdi], `\r\n`
     add qword [rbp-64], 2
-    
-    inc qword [rbp-48]
-    jmp .header_str_loop
 
+
+    add qword [rbp-40], 4 ; add the lenght for the crlf and the space and colon
+    jmp .header_str_loop
 .no_headers_str:
     mov rdx, [rbp-32]
     mov rdx, [rdx+HttpResponce.body]
