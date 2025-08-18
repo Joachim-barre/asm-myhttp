@@ -4,6 +4,11 @@
 %include "mem.inc"
 %include "pages.inc"
 %include "app.inc"
+%include "linkedlist.inc"
+%include "http_fields.inc"
+
+%define NOT_FOUND_BODY "404 Not Found"
+%strlen NOT_FOUND_BODY_LEN NOT_FOUND_BODY
 
 section .data
     extern app
@@ -11,8 +16,21 @@ section .data
     start_msg: db "starting the server", 10, 0
     port_msg: db "port : ", 0
     not_found_str: db "Not Found", 0
-    not_found_body: db "404 Not Found"
-        .len equ $- not_found_body
+    not_found_body: db NOT_FOUND_BODY
+        .len equ NOT_FOUND_BODY_LEN
+        .len_str db %str(NOT_FOUND_BODY_LEN)
+
+    LL_STATIC not_found_headers, 8, not_found_content_lenght, not_found_connection
+    LL_STATIC_NODE not_found_content_lenght, , not_found_connection, 0
+    istruc HttpHeader
+        at HttpHeader.field, dq content_lenght
+        at HttpHeader.value, dq not_found_body.len_str
+    iend
+    LL_STATIC_NODE not_found_connection, , 0, not_found_content_lenght
+    istruc HttpHeader
+        at HttpHeader.field, dq connection
+        at HttpHeader.value, dq connection_close
+    iend
 
 section .text
     global _start
@@ -90,7 +108,7 @@ request_handler: ; (i32 fd, HttpRequest*) -> bool
 .not_found:
     mov dword [rbp-48+HttpResponce.status_code], 404
     mov qword [rbp-48+HttpResponce.status_str], not_found_str
-    mov qword [rbp-48+HttpResponce.headers], 0
+    mov qword [rbp-48+HttpResponce.headers], not_found_headers
     lea rax, [rbp-64]
     mov qword [rbp-48+HttpResponce.body], rax
     mov qword [rax+HttpBody.ptr], not_found_body
