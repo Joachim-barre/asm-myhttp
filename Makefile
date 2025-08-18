@@ -1,6 +1,6 @@
 BUILDDIR=build
 LIB=$(BUILDDIR)/libmyhttp.a
-OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/helpers.o $(BUILDDIR)/net.o $(BUILDDIR)/thread.o $(BUILDDIR)/mem.o $(BUILDDIR)/http.o $(BUILDDIR)/pages.o $(BUILDDIR)/linkedlist.o
+OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/helpers.o $(BUILDDIR)/net.o $(BUILDDIR)/thread.o $(BUILDDIR)/mem.o $(BUILDDIR)/http.o $(BUILDDIR)/pages.o $(BUILDDIR)/linkedlist.o $(BUILDDIR)/http_fields.o
 
 AR=ar
 ARFLAGS=
