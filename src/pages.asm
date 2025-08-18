@@ -2,8 +2,10 @@
 %include "pages.inc"
 %include "helpers.inc"
 %include "http.inc"
+%include "app.inc"
 
 section .data
+    extern app
     extern pages
 
     ok_str: db "OK", 0
@@ -86,7 +88,7 @@ find_page: ; (HttpRequest*, int fd) -> bool
     mov edi, [rbp-30]
     lea rsi, [rbp-64]
     mov edx, 1
-    call send_with_default_headers
+    call [app+App.send_wrapper]
 
     mov rax, 1
     mov rdx, 1
@@ -106,7 +108,7 @@ find_page: ; (HttpRequest*, int fd) -> bool
     mov edi, [rbp-30]
     lea rsi, [rbp-64]
     mov edx, 1
-    call send_with_default_headers
+    call [app+App.send_wrapper]
 
     mov rax, 1
     mov rdx, 1
