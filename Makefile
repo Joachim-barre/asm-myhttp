@@ -22,5 +22,3 @@ $(BUILDDIR)/%.o: src/%.asm | $(BUILDDIR)
 
 $(LIB): $(OBJS) | $(BUILDDIR)
 	$(AR) $(ARFLAGS) rcs $(LIB) $(OBJS)
-
-TODO: build file for exemple/hello
