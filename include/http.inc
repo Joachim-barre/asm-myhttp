@@ -35,6 +35,7 @@ section .text
     extern http_init
     extern http_main_loop
     extern http_send_responce
+    extern send_with_default_headers
 
 section .bss
     extern http_server
