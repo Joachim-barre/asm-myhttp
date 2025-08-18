@@ -11,6 +11,24 @@ struc LLNodeHeader
     .size:
 endstruc
 
+; (name, item_size, front_node, back_node)
+%macro LL_STATIC 4
+    %1: istruc LinkedList
+        at LinkedList.item_size, dq %2
+        at LinkedList.front_node, dq %3
+        at LinkedList.back_node, dq %4
+    iend
+%endmacro
+
+; (name, item_size, next, prev)
+%macro LL_STATIC_NODE 4
+    %1: istruc LLNodeHeader
+        at LLNodeHeader.next, dq %3
+        at LLNodeHeader.prev, dq %4
+    iend
+    times %2 db 0
+%endmacro
+
 %ifndef LINKEDLIST_SYMBOLS
 section .text
     extern ll_init ; (LinkedList*, u64 item_size)
