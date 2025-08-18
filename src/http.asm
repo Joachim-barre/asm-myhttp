@@ -4,6 +4,7 @@
 %include "mem.inc"
 %include "helpers.inc"
 %include "linkedlist.inc"
+%include "http_fields.inc"
 
 section .bss
     global http_server
@@ -20,6 +21,7 @@ section .text
     global http_init
     global http_main_loop
     global http_send_responce
+    global send_with_default_headers
 
 http_init: ; (u16 port, u32 address, handler(fd, HttpRequest) -> bool) -> HttpServer*
     push rbp ; align the stack
@@ -420,6 +422,63 @@ http_send_responce: ; (u32 fd, HttpResponce*)
 
     mov rdi, [rbp-56]
     call free
+
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
+; send with the content_lenght and connetion headers
+send_with_default_headers: ; (u32 fd, HttpResponce*, bool keep_alive)
+    push rbp
+    mov rbp, rsp
+
+    sub rsp, 128
+    ; [rbp-24]=header_list
+    mov [rbp-32], rsi; [rbp-32]=responce
+    ; [rbp-64]=content_lenght_header_node [rbp-48]=node_data
+    ; [rbp-96]=connection_header_node [rbp-80]=node_data
+    mov [rbp-100], edi; [rbp-100]=fd
+    mov [rbp-104], edx; [rbp-104]=keep_alive
+    ; [rbp-128]=content_lenght_buffer
+
+    ; initalize the header list
+    mov qword [rbp-24+LinkedList.item_size], HttpHeader.size
+    lea rax, [rbp-64]
+    mov [rbp-24+LinkedList.front_node], rax
+    lea rax, [rbp-96]
+    mov [rbp-24+LinkedList.back_node], rax
+    ; initalise the content_lenght_header_node
+    mov [rbp-64+LLNodeHeader.next], rax 
+    mov qword [rbp-64+LLNodeHeader.prev], 0
+    mov qword [rbp-48+HttpHeader.field], content_lenght
+    lea rdi, [rbp-128]
+    mov rsi, 24
+    mov rdx, [rbp-32]
+    mov rdx, [rdx+HttpResponce.body]
+    mov edx, [rdx+HttpBody.len]
+    mov ecx, 0
+    call itos
+    mov qword [rbp-48+HttpHeader.value], rax
+    ; initalize the connection_header_node
+    lea rax, [rbp-64]
+    mov [rbp-96+LLNodeHeader.prev], rax 
+    mov qword [rbp-96+LLNodeHeader.next], 0
+    mov qword [rbp-80+HttpHeader.field], connection
+    mov rax, connection_keep_alive
+    mov edi, [rbp-104]
+    mov rdx, connection_close
+    test edi, edi
+    cmovz rax, rdx
+    mov qword [rbp-80+HttpHeader.value], rax
+    ; make the responce headers point  to the linked list
+    lea rax, [rbp-24]
+    mov rsi, [rbp-32]
+    mov [rsi+HttpResponce.headers], rax
+    ; send the responce
+    mov edi, [rbp-100]
+    call http_send_responce
+    
 
     mov rsp, rbp
     pop rbp
