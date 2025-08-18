@@ -235,7 +235,7 @@ ll_iter_next:
     test rax, rax
     jz .end
     
-    mov rdx, [rdi+LLNodeHeader.size]
+    lea rdx, [rdi+LLNodeHeader.size]
     
     ret
 
