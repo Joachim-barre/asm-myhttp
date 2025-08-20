@@ -7,7 +7,9 @@ section .text
     global print
     global printi
     global strchr
+    global memchr
     global memcpy
+    global memmove
     global strcmp
 
 strrev: 
