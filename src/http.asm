@@ -93,6 +93,7 @@ http_handler: ; (u32 fd)
 
     test rax, rax
     js .error
+    jz .exit ; connection closed
 
     mov [rbp-72], rax ; save buf_len
     ; null terminate the buf
