@@ -206,7 +206,7 @@ bfr_read:
     jmp .exit
 .enough_data:
     mov rdi, [rbp-8]
-    mov rsi, [rdi+BufferedFileReader.buffer_data_size]
+    mov esi, [rdi+BufferedFileReader.buffer_data_size]
     mov rdx, [rbp-24]
     cmp rdx, rsi
     cmovae rdx, rsi
