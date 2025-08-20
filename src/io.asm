@@ -295,6 +295,7 @@ bfr_read_until:
     jmp .exit
 .found:
     mov rdx, [rbp-8]
+    inc rax ; include the searched char
 
     mov edi, [rdx+BufferedFileReader.buffer_offset]
     neg rdi
