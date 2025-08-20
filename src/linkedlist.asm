@@ -105,10 +105,8 @@ ll_push_front:
     jz .exit
     call memcpy
 .exit:
-    mov rdi, [rbp-8]
-    mov rdi, [rdi+LinkedList.item_size]
     mov rax, [rbp-24]
-    add rax, rdi
+    add rax, LLNodeHeader.size
 
     mov rsp, rbp
     pop rbp
@@ -150,10 +148,8 @@ ll_push_back:
     jz .exit
     call memcpy
 .exit:
-    mov rdi, [rbp-8]
-    mov rdi, [rdi+LinkedList.item_size]
     mov rax, [rbp-24]
-    add rax, rdi
+    add rax, LLNodeHeader.size
     
     mov rsp, rbp
     pop rbp
