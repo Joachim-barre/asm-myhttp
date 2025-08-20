@@ -260,6 +260,9 @@ memcpy: ; (void*, void*, count)
 
     ret
 
+; same as memcpy since memcpy already supports overlaping data
+memmove equ memcpy
+
 strcmp: ; (char*, char*) -> i32
     push rbp
     mov rbp, rsp

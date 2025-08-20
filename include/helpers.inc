@@ -8,6 +8,7 @@ section .text:
     extern printi ; (i32)
     extern strchr ; (char*, char) -> char*
     extern memcpy ; (void* dest, void* src, u64 count)
+    extern memmove ; same as memcpy but for overlapping data
     extern strcmp ; (char*, char*) -> i32
 
 
