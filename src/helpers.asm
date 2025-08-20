@@ -6,7 +6,7 @@ section .text
     global strlen
     global print
     global printi
-    global find_char
+    global strchr
     global memcpy
     global strcmp
 
