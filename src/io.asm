@@ -10,6 +10,7 @@ section .text
     global bfr_read
     global bfr_read_all
     global bfr_read_until
+    global bfr_fill_buf
 
 bfr_init:
     push rbp
@@ -320,6 +321,41 @@ bfr_read_until:
     mov rdi, [rbp-8]
     sub [rdi+BufferedFileReader.buffer_data_size], edx
     add [rdi+BufferedFileReader.buffer_offset], edx
+.exit:
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
+bfr_fill_buf:
+    push rbp
+    mov rbp, rsp
+
+    sub rsp, 32
+    mov [rbp-8], rdi ; [rbp-8]=self
+
+    mov rcx, [rdi+BufferedFileReader.buffer_data_size]
+    test rcx, rcx
+    jnz .enough_data
+
+    mov esi, [rdi+BufferedFileReader.buffer_offset]
+    add esi, [rdi+BufferedFileReader.buffer_data_size]
+    neg esi
+    add esi, [rdi+BufferedFileReader.buffer_size]
+    call bfr_try_read_more
+
+    test eax, eax
+    js .error
+    jz .eof
+    jmp .enough_data
+.eof:
+    xor rax, rax
+    jmp .exit
+.error:
+    movsxd rax, eax
+    jmp .exit
+.enough_data:
+    movsxd rax, eax
 .exit:
     mov rsp, rbp
     pop rbp
