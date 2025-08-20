@@ -117,7 +117,7 @@ http_handler: ; (u32 fd)
     add rdi, [rbp-64]
     mov rsi, [rbp-72]
     sub rsi, rax ; substract the offset from the size
-    mov dl, ' '
+    mov dl, '\r'
     call find_char
 
     ; put a zero where there was a new line
