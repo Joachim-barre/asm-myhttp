@@ -12,16 +12,35 @@ section .bss
     http_server equ server
     handler: resq 1
 
+%define BAD_REQUEST_BODY "400 Bad Request"
+%strlen BAD_REQUEST_BODY_LEN BAD_REQUEST_BODY
+
 section .data
     recived_msg: db "recived request: ", 0
     ver_str: db "HTTP/1.1", 0
         .len equ $- ver_str-1
+
+    bad_request_str: db "Bad Request", 0
+    bad_request_body: db BAD_REQUEST_BODY
+        .len equ BAD_REQUEST_BODY_LEN
+        .len_str db %str(BAD_REQUEST_BODY_LEN), 0
+
+    LL_STATIC bad_request_headers, HttpHeader.size, bad_request_content_lenght, bad_request_connection
+    LL_STATIC_NODE bad_request_content_lenght, , bad_request_connection, 0
+    istruc HttpHeader
+        at HttpHeader.field, dq content_lenght
+        at HttpHeader.value, dq bad_request_body.len_str
+    iend
+    LL_STATIC_NODE bad_request_connection, , 0, bad_request_content_lenght
+    istruc HttpHeader
+        at HttpHeader.field, dq connection
 
 section .text
     global http_init
     global http_main_loop
     global http_send_responce
     global send_with_default_headers
+    global send_bad_request
 
 http_init: ; (u16 port, u32 address, handler(fd, HttpRequest) -> bool) -> HttpServer*
     push rbp ; align the stack
@@ -479,6 +498,30 @@ send_with_default_headers: ; (u32 fd, HttpResponce*, bool keep_alive)
     mov edi, [rbp-100]
     call http_send_responce
     
+
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
+send_bad_request: ; (u32 fd)
+    push rbp
+    mov rbp, rsp
+
+    sub rbp, 48
+    ; [rbp-32]=responce
+    ; [rbp-48]=body
+
+    mov dword [rbp-32+HttpResponce.status_code], 400
+    mov qword [rbp-32+HttpResponce.status_str], bad_request
+    mov qword [rbp-32+HttpResponce.headers], bad_request_headers
+    lea rax, [rbp-48]
+    mov qword [rbp-32+HttpResponce.body], rax
+    mov qword [rax+HttpBody.ptr], bad_request_body
+    mov qword [rax+HttpBody.len], bad_request_body.len
+
+    lea rsi, [rbp-32]
+    call http_send_responce
 
     mov rsp, rbp
     pop rbp
