@@ -74,11 +74,13 @@ ll_push_front:
     push rbp
     mov rbp, rsp
 
-    sub rsp, 16
+    sub rsp, 32
     mov [rbp-8], rdi ; [rbp-8]=list
     mov [rbp-16], rsi ; [rbp-16]=item
+    ; [rbp-24]=node
 
     call ll_alloc_node
+    mov [rbp-24], rax
 
     mov rdi, [rbp-8]
     mov rsi, [rdi+LinkedList.front_node]
@@ -103,6 +105,11 @@ ll_push_front:
     jz .exit
     call memcpy
 .exit:
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+LinkedList.item_size]
+    mov rax, [rbp-24]
+    add rax, rdi
+
     mov rsp, rbp
     pop rbp
 
@@ -112,11 +119,13 @@ ll_push_back:
     push rbp
     mov rbp, rsp
 
-    sub rsp, 16
+    sub rsp, 32
     mov [rbp-8], rdi ; [rbp-8]=list
     mov [rbp-16], rsi ; [rbp-16]=item
+    ; [rbp-24]=node
 
     call ll_alloc_node
+    mov [rbp-24], rax
 
     mov rdi, [rbp-8]
     mov rsi, [rdi+LinkedList.back_node]
@@ -141,6 +150,11 @@ ll_push_back:
     jz .exit
     call memcpy
 .exit:
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+LinkedList.item_size]
+    mov rax, [rbp-24]
+    add rax, rdi
+    
     mov rsp, rbp
     pop rbp
 
