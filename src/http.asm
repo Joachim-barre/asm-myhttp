@@ -69,13 +69,15 @@ http_handler: ; (u32 fd)
     push rbp
     mov rbp, rsp
 
-    sub rsp, 96
+    sub rsp, 128
     mov [rbp-8], rdi ; [rbp-8]=fd
     ; [rbp-16]=buf
     ; [rbp-56]=request
-    ; [rbp-64]=offset
+    ; [rbp-64]=offseted_buf
     ; [rbp-72]=buf_len
     ; [rbp-96]=body
+    ; [rbp-120]=headers
+    ; [rbp-128]=current_header
 
     mov rdi, 1024
     call malloc
@@ -104,76 +106,109 @@ http_handler: ; (u32 fd)
     
     ; read the method
     mov rdi, [rbp-16]
-    mov rsi, rax
-    mov dl, ' '
-    call find_char
+    mov sil, ' '
+    call strchr
+
+    test rax, rax
+    jz .bad_request
 
     ; put a zero where there was a space
-    mov rdi, [rbp-16]
-    mov byte [rdi+rax], 0
+    mov byte [rax], 0
 
+    mov rdi, [rbp-16]
     mov [rbp-56+HttpRequest.method], rdi ; save the method
     inc rax
     mov [rbp-64], rax, ; save the offset
 
     ; read the path
-    mov rdi, [rbp-16]
-    add rdi, [rbp-64]
-    mov rsi, [rbp-72]
-    sub rsi, rax ; substract the offset from the size
-    mov dl, ' '
-    call find_char
+    mov rdi, [rbp-64]
+    mov sil, ' '
+    call strchr
+
+    test rax, rax
+    jz .bad_request
 
     ; put a zero where there was a space
-    mov rdi, [rbp-16]
-    add rdi, [rbp-64]
-    mov byte [rdi+rax], 0
+    mov byte [rax], 0
 
+    mov rdi, [rbp-64]
     mov [rbp-56+HttpRequest.path], rdi
-    add [rbp-64], rax, ; save the offset
+    inc rax
+    mov [rbp-64], rax, ; save the offset
 
     ; read the ver
-    mov rdi, [rbp-16]
-    add rdi, [rbp-64]
-    mov rsi, [rbp-72]
-    sub rsi, rax ; substract the offset from the size
-    mov dl, '\r'
-    call find_char
+    mov rdi, [rbp-64]
+    mov sil, `\r`
+    call strchr
+
+    test rax, rax
+    jz .bad_request
 
     ; put a zero where there was a new line
-    mov rdi, [rbp-16]
-    add rdi, [rbp-64]
-    mov byte [rdi+rax], 0
+    mov byte [rax], 0
 
+    mov rdi, [rbp-64]
     mov [rbp-56+HttpRequest.ver], rdi
-    add [rbp-64], rax, ; save the offset
+    add rax, 2
+    mov [rbp-64], rax, ; save the offset
 
-    inc qword [rbp-64] ; increase the offset to skip the new line
+    lea rdi, [rbp-120]
+    mov rsi, HttpHeader.size
+    call ll_init
+
+    mov rdi, [rbp-64]
+    cmp byte [rdi], `\r`
+    je .no_headers
 
 .header_loop:
-    mov rdi, [rbp-16]
-    add rdi, [rbp-64]
+    mov rdi, [rbp-64]
     cmp byte [rdi], `\r`
     je .header_loop_end
+
+    lea rdi, [rbp-120]
+    xor rsi, rsi
+    call ll_push_back
+    mov [rbp-128], rax
     
-    ; TODO : parse the headers
+    mov rdi, [rbp-64]
+    mov sil, ":"
+    call strchr
+    
+    test rax, rax
+    jz .bad_request
+    
+    mov byte [rax], 0
 
-    mov rdi, [rbp-16]
-    add rdi, [rbp-64]
-    mov rsi, [rbp-72]
-    sub rsi, [rbp-64] ; substract the offset from the size
-    mov dl, `\r`
-    call find_char
+    mov rsi, [rbp-128]
+    mov [rsi+HttpHeader.field], rdi
+    inc rax
+    mov [rbp-64], rax
+    
+    lea rdi, [rax+1]
+    cmp byte [rax], ' '
+    cmovne rdi, rax
+    mov [rbp-64], rdi
 
-    add [rbp-64], rax
-    add qword [rbp-64], 2
+    mov sil, `\r`
+    call strchr
+
+    test rax, rax
+    jz .bad_request
+
+    mov byte [rax], 0
+    
+    mov rdi, [rbp-64]
+    mov rsi, [rbp-128]
+    mov [rsi+HttpHeader.value], rdi
+    add rax, 2
+    mov [rbp-64], rax
 
     jmp .header_loop
-    
+.no_headers:
+    mov qword [rbp-56+HttpRequest.headers], 0
 .header_loop_end:
     add qword [rbp-64], 2
-    mov rdi, [rbp-16]
-    add rdi, [rbp-64]
+    mov rdi, [rbp-64]
     
     mov al, [rdi]
     test al, al 
@@ -182,8 +217,8 @@ http_handler: ; (u32 fd)
     lea rax, [rbp-96]
     mov [rbp-56+HttpRequest.body], rax
     mov [rax+HttpBody.ptr], rdi
-    mov rax, [rbp-72]
-    sub rax, [rbp-64] 
+    
+    call strlen
     mov [rbp-96+HttpBody.len], rax
     
     jmp .body_parse_end
@@ -212,6 +247,9 @@ http_handler: ; (u32 fd)
     lea rsi, [rbp-56]
     call [handler]
 
+    lea rdi, [rbp-120]
+    call ll_clear
+
     test rax, rax
     jnz .loop
     jmp .exit
@@ -219,7 +257,10 @@ http_handler: ; (u32 fd)
 .error:
     mov rdi, rax
     call printi
-
+    jmp .exit
+.bad_request:
+    mov edi, [rbp-8]
+    call send_bad_request
 .exit:
     ; free the buffer
     mov rdi, [rbp-16]
