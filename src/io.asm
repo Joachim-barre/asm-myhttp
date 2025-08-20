@@ -332,7 +332,7 @@ bfr_fill_buf:
     push rbp
     mov rbp, rsp
 
-    sub rsp, 32
+    sub rsp, 16
     mov [rbp-8], rdi ; [rbp-8]=self
 
     mov ecx, [rdi+BufferedFileReader.buffer_data_size]
