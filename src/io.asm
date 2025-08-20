@@ -188,9 +188,9 @@ bfr_read:
     jnz .enough_data
 
     mov esi, edx
-    sub esi, [rdi+BufferedFileReader.buffer_data_size]
     call bfr_try_read_more
 
+    test eax, eax
     js .error
     jz .eof
     jmp .enough_data
