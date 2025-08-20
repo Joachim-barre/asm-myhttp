@@ -219,8 +219,8 @@ bfr_read:
 
     mov rdi, [rbp-8]
     mov rax, [rbp-24]
-    add [rdi+BufferedFileReader.buffer_offset], rax
-    sub [rdi+BufferedFileReader.buffer_data_size], rax
+    add [rdi+BufferedFileReader.buffer_offset], eax
+    sub [rdi+BufferedFileReader.buffer_data_size], eax
 .exit:
     mov rsp, rbp
     pop rbp
