@@ -232,7 +232,6 @@ printi:
 strchr: ; (char*, char) -> char*
     push rbp
     mov rbp, rsp
-    sub rsp, 8
 
     mov rax, rdi
 .loop:
@@ -244,6 +243,29 @@ strchr: ; (char*, char) -> char*
     jz .error
 
     inc rax
+    jmp .loop
+.error:
+    mov rax, 0
+.end:    
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
+memchr: ; (char*, char, u64 count) -> char*
+    push rbp
+    mov rbp, rsp
+
+    mov rax, rdi
+    add rdi, rdx
+.loop:
+    mov cl, [rax]
+    cmp cl, sil
+    je .end
+
+    inc rax
+    cmp rax, rdi
+    je .error
     jmp .loop
 .error:
     mov rax, 0
