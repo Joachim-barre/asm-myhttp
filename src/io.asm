@@ -184,8 +184,8 @@ bfr_read:
     cmp rdx, BFR_MAX_BUFSIZE
     ja .einval
 
-    mov rcx, [rdi+BufferedFileReader.buffer_data_size]
-    test rcx, rcx
+    mov ecx, [rdi+BufferedFileReader.buffer_data_size]
+    test ecx, ecx
     jnz .enough_data
 
     mov esi, edx
@@ -335,8 +335,8 @@ bfr_fill_buf:
     sub rsp, 32
     mov [rbp-8], rdi ; [rbp-8]=self
 
-    mov rcx, [rdi+BufferedFileReader.buffer_data_size]
-    test rcx, rcx
+    mov ecx, [rdi+BufferedFileReader.buffer_data_size]
+    test ecx, ecx
     jnz .enough_data
 
     mov esi, [rdi+BufferedFileReader.buffer_offset]
