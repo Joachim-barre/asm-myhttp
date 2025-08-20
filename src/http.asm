@@ -508,12 +508,12 @@ send_bad_request: ; (u32 fd)
     push rbp
     mov rbp, rsp
 
-    sub rbp, 48
+    sub rsp, 48
     ; [rbp-32]=responce
     ; [rbp-48]=body
 
     mov dword [rbp-32+HttpResponce.status_code], 400
-    mov qword [rbp-32+HttpResponce.status_str], bad_request
+    mov qword [rbp-32+HttpResponce.status_str], bad_request_str
     mov qword [rbp-32+HttpResponce.headers], bad_request_headers
     lea rax, [rbp-48]
     mov qword [rbp-32+HttpResponce.body], rax
