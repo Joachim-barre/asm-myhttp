@@ -229,23 +229,29 @@ printi:
 	pop rbp
 	ret
 
-find_char: ; (char*, u64 len, char) -> u64
-	push rbp
-	mov rbp, rsp
-	sub rsp, 8
-	mov [rbp-8], rdi
-	
-	mov rcx, rsi
-	mov al, dl
-	repne scasb
+strchr: ; (char*, char) -> char*
+    push rbp
+    mov rbp, rsp
+    sub rsp, 8
 
-	sub rdi, [rbp-8]
-	lea rax, [rdi-1]
+    mov rax, rdi
+.loop:
+    mov cl, [rax]
+    cmp cl, sil
+    je .end
 
-	mov rsp, rbp
-	pop rbp
+    test cl, cl
+    jz .error
 
-	ret
+    inc rax
+    jmp .loop
+.error:
+    mov rax, 0
+.end:    
+    mov rsp, rbp
+    pop rbp
+
+    ret
 
 memcpy: ; (void*, void*, count)
     cld
