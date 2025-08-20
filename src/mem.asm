@@ -20,10 +20,10 @@ section .text
     global heap_init
     global malloc
     global free
+    global align_up
 
-; align up to 16 byte
-align_up: ; (u64 val, align) -> u64
-    ; skip if alignment is i or 0
+align_up: ; (u64 val, u64 align) -> u64
+    ; skip if alignment is 1 or 0
     cmp rsi, 1
     jbe .exit
 
