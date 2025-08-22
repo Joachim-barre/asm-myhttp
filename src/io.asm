@@ -364,7 +364,7 @@ bfr_fill_buf:
 
     ret
 
-bfr_read:
+bfr_skip:
     push rbp
     mov rbp, rsp
 
