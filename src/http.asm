@@ -302,21 +302,31 @@ http_handler: ; (u32 fd)
     mov rsi, 2
     call bfr_skip
     
-    ; TODO: check if there is a body
+    lea rdi, [rbp-128]
+    lea rsi, [content_lenght]
+    call http_header_get_val
 
-    lea rax, [rbp-96]
-    mov [rbp-56+HttpRequest.body], rax
+    test rax, rax
+    jz .no_body
 
-    ; TODO: support reading content lenght instead
-    mov rdi, BFR_MAX_BUFSIZE
+    mov rdi, rax
+    call stoi
+
+    mov [rbp-96+HttpBody.len], rax
+
+    lea rdi, [rbp-96]
+    mov [rbp-64+HttpRequest.body], rdi
+
+    lea rdi, [rax+1]
     call malloc
 
     mov [rbp-96+HttpBody.ptr], rax
 
+    ; TODO: support bodies larger than BFR_MAX_BUFSIZE
     lea rdi, [rbp-24]
     mov rsi, rax
-    mov rdx, BFR_MAX_BUFSIZE-1
-    call bfr_read
+    mov rdx, [rbp-96+HttpBody.len]
+    call bfr_read_all
 
     test rax, rax
     js .error
