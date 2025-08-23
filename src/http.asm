@@ -42,6 +42,7 @@ section .text
     global http_send_responce
     global send_with_default_headers
     global send_bad_request
+    global http_header_get_val
 
 http_init: ; (u16 port, u32 address, handler(fd, HttpRequest) -> bool) -> HttpServer*
     push rbp ; align the stack
@@ -579,6 +580,38 @@ send_bad_request: ; (u32 fd)
 
     lea rsi, [rbp-32]
     call http_send_responce
+
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
+http_header_get_val: ; (LinkedList*, char*) -> char*
+    push rbp
+    mov rbp, rsp
+
+    mov rdx, rsi
+    lea rsi, [.comparator]
+    call ll_find
+
+    mov rax, [rax+HttpHeader.value]
+
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
+.comparator: ; (char*, HttpHeader*) -> bool
+    push rbp
+    mov rbp, rsp
+
+    mov rsi, [rsi+HttpHeader.field]
+    call strcmp
+
+    test eax, eax
+    setz al
+
+    movzx eax, al
 
     mov rsp, rbp
     pop rbp

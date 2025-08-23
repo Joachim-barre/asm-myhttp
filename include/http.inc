@@ -37,6 +37,7 @@ section .text
     extern http_send_responce
     extern send_with_default_headers
     extern send_bad_request
+    extern http_header_get_val
 
 section .bss
     extern http_server
