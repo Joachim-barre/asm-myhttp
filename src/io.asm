@@ -22,7 +22,7 @@ bfr_init:
     mov [rbp-8], rdi ; [rbp-8]=self
 
     mov [rdi+BufferedFileReader.fd], esi
-    mov dword [rdi+BufferedFileReader.buffer_size], 0
+    mov dword [rdi+BufferedFileReader.buffer_size], BFR_INITIAL_BUFSIZE
     mov dword [rdi+BufferedFileReader.buffer_offset], 0
     mov dword [rdi+BufferedFileReader.buffer_data_size], 0
 
