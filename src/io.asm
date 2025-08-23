@@ -305,6 +305,7 @@ bfr_read_until:
     add rdi, [rax+BufferedFileReader.buffer]
     mov sil, [rbp-13]
     mov edx, [rax+BufferedFileReader.buffer_data_size]
+    add edx, [rax+BufferedFileReader.buffer_offset] ; since [rbp-12] include it but not data size
     sub edx, [rbp-12]
     add [rbp-12], edx ; update the offset
     call memchr
