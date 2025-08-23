@@ -38,7 +38,7 @@ section .text
     ; on success return the number of skiped chars
     ; returns EINVAL if count is greater than BFR_MAX_BUFSIZE
     ; return 0 on eof and a negative value or error
-    extern bfr_skip ; (BufferedFileReader*, u64 count)
+    extern bfr_skip ; (BufferedFileReader*, u64 count) -> u64
 
     ; if read returns less than the lenght read will not retry
     ; returns the number of char that where read
