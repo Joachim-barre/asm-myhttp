@@ -302,7 +302,7 @@ http_handler: ; (u32 fd)
     mov rsi, 2
     call bfr_skip
     
-    lea rdi, [rbp-128]
+    mov rdi, [rbp-64+HttpRequest.headers]
     lea rsi, [content_lenght]
     call http_header_get_val
 
