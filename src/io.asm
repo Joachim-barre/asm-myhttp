@@ -317,6 +317,7 @@ bfr_read_until:
     call bfr_try_read_more
     js .error
     jz .eof
+    jmp .loop
 .eof:
     xor rax, rax
     xor rdx, rdx
