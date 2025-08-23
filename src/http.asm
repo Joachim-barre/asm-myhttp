@@ -242,7 +242,6 @@ http_handler: ; (u32 fd)
     lea rax, [rbp-120]
     mov [rbp-64+HttpRequest.headers], rax
 .header_loop:
-    ; TODO upate this part and those after to use the new BufferedFileReader
     lea rdi, [rbp-24]
     lea rsi, [rbp-128]; use current header as buffer for bfr peak
     mov rdx, 1
