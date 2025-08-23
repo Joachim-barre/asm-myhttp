@@ -67,6 +67,93 @@ http_main_loop:
 
     ret
     
+; this should only be used by http_handler
+http_handler_free_request: ; (HttpRequest*)
+    push rbp
+    mov rbp, rsp
+
+    sub rsp, 24
+    mov [rbp-8], rdi ; [rbp-8]=request
+    ; [rbp-16]=header_iter
+    ; [rbp-24]=current_header
+
+    mov rdi, [rdi+HttpRequest.method]
+    test rdi, rdi
+    jz .no_method
+
+    call free
+
+.no_method:
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+HttpRequest.path]
+    test rdi, rdi
+    jz .no_path
+
+    call free
+
+.no_path:
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+HttpRequest.ver]
+    test rdi, rdi
+    jz .no_ver
+
+    call free
+
+.no_ver:
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+HttpRequest.headers]
+    test rdi, rdi
+    jz .no_headers
+
+    call ll_iter
+    mov [rbp-16], rax
+
+.header_loop:
+    mov rdi, [rbp-16]
+    call ll_iter_next
+    mov [rbp-16], rax
+    mov [rbp-24], rdx
+
+    test rdx, rdx
+    jz .header_loop_end
+
+    mov rdi, [rdx+HttpHeader.field]
+    test rdi, rdi
+    jz .no_header_field
+
+    call free
+
+.no_header_field:
+    mov rdx, [rbp-24]
+    mov rdi, [rdx+HttpHeader.value]
+    test rdi, rdi
+    jz .no_header_value
+
+    call free
+
+.no_header_value:
+    jmp .header_loop
+    
+.header_loop_end:
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+HttpRequest.headers]
+    call ll_clear
+
+.no_headers:
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+HttpRequest.body]
+    test rdi, rdi
+    jz .no_body
+
+    mov rdi, [rdi+HttpBody.ptr]
+    call free
+
+.no_body:
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
 http_handler: ; (u32 fd)
     push rbp
     mov rbp, rsp
@@ -84,6 +171,12 @@ http_handler: ; (u32 fd)
 
 ; main loop
 .loop:
+    ; initialise every field of the request to zero
+    mov qword [rbp-64+HttpRequest.method], 0
+    mov qword [rbp-64+HttpRequest.headers], 0
+    mov qword [rbp-64+HttpRequest.ver], 0
+    mov qword [rbp-64+HttpRequest.body], 0
+
     lea rdi, [rbp-24]
     call bfr_fill_buf
 
@@ -167,6 +260,10 @@ http_handler: ; (u32 fd)
     xor rsi, rsi
     call ll_push_back
     mov [rbp-128], rax
+
+    ; initialise the header's field to null
+    mov qword [rax+HttpHeader.field], 0
+    mov qword [rax+HttpHeader.value], 0
     
     lea rdi, [rbp-24]
     mov sil, `:`
@@ -257,15 +354,14 @@ http_handler: ; (u32 fd)
     lea rsi, [rbp-64]
     call [handler]
 
-    ; TODO free the resqest data
-
-    lea rdi, [rbp-120]
-    call ll_clear
-
     test rax, rax
-    jnz .loop
-    jmp .exit
+    jz .exit
 
+    ; free the request
+    lea rdi, [rbp-64]
+    call http_handler_free_request
+    
+    jmp .loop
 .error:
     cmp rax, EFBIG
     je .bad_request
@@ -277,6 +373,10 @@ http_handler: ; (u32 fd)
     mov edi, [rbp-8]
     call send_bad_request
 .exit:
+    ; free the request
+    lea rdi, [rbp-64]
+    call http_handler_free_request
+
     ; free the buffer
     lea rdi, [rbp-24]
     call bfr_free
