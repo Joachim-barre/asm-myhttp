@@ -703,12 +703,19 @@ http_header_get_val: ; (LinkedList*, char*) -> char*
     lea rsi, [.comparator]
     call ll_find
 
+    test rax, rax
+    jz .not_found
+
     mov rax, [rax+HttpHeader.value]
 
+.exit:
     mov rsp, rbp
     pop rbp
 
     ret
+.not_found:
+    xor rax, rax
+    jmp .exit
 
 .comparator: ; (char*, HttpHeader*) -> bool
     push rbp
