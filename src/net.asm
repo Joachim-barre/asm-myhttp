@@ -12,6 +12,7 @@ section .bss
 
 section .data
     connection_msg: db "Accepting connection from : ", 0
+    disconnection_msg: db "Closing connection with : ", 0
 
 section .text
     global server_init
@@ -172,6 +173,17 @@ server_child_handler: ; (u64 fd (zero extended))
     mov edi, [rbp-28]
     mov rax, [server+Server.handler]
     call rax
+
+    ; log the request
+    lea rdi, [disconnection_msg]
+    call print
+
+    mov edi, [rbp-16+SockAddr.addr]
+    mov si, [rbp-16+SockAddr.port]
+    call print_ip_port
+
+    mov dil, 10
+    call putchar
 
     ; close the connection
     mov rax, 3 ; sys_close
