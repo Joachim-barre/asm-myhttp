@@ -359,7 +359,7 @@ http_handler: ; (u32 fd)
     call putchar
 
     ; call the handler
-    lea edi, [rbp-24+BufferedFileReader.fd]
+    mov edi, [rbp-24+BufferedFileReader.fd]
     lea rsi, [rbp-64]
     call [handler]
 
