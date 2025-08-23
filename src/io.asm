@@ -375,6 +375,12 @@ bfr_fill_buf:
     add esi, [rdi+BufferedFileReader.buffer_data_size]
     neg esi
     add esi, [rdi+BufferedFileReader.buffer_size]
+
+    ; if the buffer is already full ask for 1 byte
+    mov edx, 1
+    test esi, esi
+    cmovz esi, edx
+
     call bfr_try_read_more
 
     test eax, eax
