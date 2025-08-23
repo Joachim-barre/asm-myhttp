@@ -11,6 +11,7 @@ section .text
     global memcpy
     global memmove
     global strcmp
+    global stoi
 
 strrev: 
 	push rbp
@@ -318,3 +319,51 @@ strcmp: ; (char*, char*) -> i32
 
     ret
 
+stoi:
+    ; rdi=str (offseted)
+    mov rax, 0 ; rax=val
+    xor sil, sil ; sil=is_negative
+    ; cl=current_char
+
+    mov byte cl, [rdi]
+    test cl, cl
+    jz .exit
+    
+    ; ignore + symbol
+    cmp cl, '+'
+    je .skip_char
+
+    cmp cl, '-'
+    sete sil 
+    je .skip_char
+.loop:
+    mov cl, [rdi]
+    test cl, cl
+    jz .end
+
+    ; skip invalid chars while computing current-'0'
+    sub cl, '0'
+    jb .skip_char
+    cmp cl, 9
+    ja .skip_char
+
+    ; multiply the current value by 10
+    mov rdx, 10
+    mul rdx
+
+    ; add the value of the current digit to the value
+    add rax, cl
+
+    ; loop again
+    jmp .loop
+
+.skip_char:
+    inc rdi
+    jmp .loop
+.end:
+    test sil, sil
+    jz .exit
+
+    neg rax
+.exit:
+    ret
