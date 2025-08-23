@@ -16,6 +16,7 @@ section .text
     global ll_pop_back
     global ll_iter
     global ll_iter_next
+    global ll_find
 
 ll_init:
     mov [rdi+LinkedList.item_size], rsi
@@ -257,5 +258,46 @@ ll_iter_next:
 .end:
     mov rax, 0
     xor rdx, rdx
+
+    ret
+
+ll_find:
+    push rbp
+    mov rbp, rsp
+
+    sub rsp, 32
+    mov [rbp-8], rsi ; [rbp-8]=fn
+    mov [rbp-16], rdx ; [rbp-16]=fn_arg
+    ; [rbp-24]=current_iter
+    ; [rbp-32]=current value
+
+    ; rdi already points to self
+    call ll_iter
+    mov [rbp-24], rax
+
+.loop:
+    mov rdi, [rbp-24]
+    call ll_iter_next
+    mov [rbp-24], rax
+    mov [rbp-32], rdx
+
+    test rdx, rdx
+    jz .not_found
+
+    mov rdi, [rbp-16]
+    mov rsi, rdx
+    call [rbp-8]
+
+    test eax, eax
+    jnz .found
+    jmp .loop
+.not_found:
+    xor rax, rax
+    jmp .exit
+.found:
+    mov rax, [rbp-32]
+.exit:
+    mov rsp, rbp
+    pop rbp
 
     ret

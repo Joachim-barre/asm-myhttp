@@ -44,4 +44,8 @@ section .text
     extern ll_pop_back ; (LinkedList*)
     extern ll_iter ; (LinkedList*) -> LinkedListIter*
     extern ll_iter_next ; (LinkedListIter*) -> (LinkedListIter*, void*)
+    ; find an item in the list
+    ; use the second argument to compare the value by passing the third argument and the current item to it
+    ; returns null if not found
+    extern ll_find ; (LinkedList*, fn(void*, void*) -> bool, void*) -> void*
 %endif
