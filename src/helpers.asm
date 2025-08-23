@@ -352,7 +352,8 @@ stoi:
     mul rdx
 
     ; add the value of the current digit to the value
-    add rax, cl
+    movzx, rcx, cl
+    add rax, rcx
 
     ; loop again
     jmp .loop
