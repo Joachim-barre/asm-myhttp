@@ -34,6 +34,11 @@ section .text
     ; return 0 on eof and a negative value or error
     extern bfr_fill_buf ; (BufferedFileReader*)
 
+    ; if read returns less than the lenght read will not retry
+    ; it doesn't consume chars
+    ; returns the number of char that where read
+    extern bfr_peek ; (BufferedFileReader*, char* buf, u64 len) -> u64
+
     ; skip characters
     ; on success return the number of skiped chars
     ; returns EINVAL if count is greater than BFR_MAX_BUFSIZE
