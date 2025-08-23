@@ -352,7 +352,7 @@ stoi:
     mul rdx
 
     ; add the value of the current digit to the value
-    movzx, rcx, cl
+    movzx rcx, cl
     add rax, rcx
 
     ; loop again
