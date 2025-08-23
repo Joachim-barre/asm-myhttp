@@ -262,13 +262,15 @@ memchr: ; (char*, char, u64 count) -> char*
     mov rax, rdi
     add rdi, rdx
 .loop:
+    cmp rax, rdi
+    je .error
+
     mov cl, [rax]
     cmp cl, sil
     je .end
 
     inc rax
-    cmp rax, rdi
-    je .error
+    
     jmp .loop
 .error:
     mov rax, 0
