@@ -5,6 +5,7 @@
 %include "helpers.inc"
 %include "linkedlist.inc"
 %include "http_fields.inc"
+%include "io.inc"
 
 section .bss
     global http_server
@@ -32,7 +33,7 @@ section .data
         at HttpHeader.value, dq bad_request_body.len_str
     iend
     LL_STATIC_NODE bad_request_connection, , 0, bad_request_content_lenght
-    istruc HttpHeader
+istruc HttpHeader
         at HttpHeader.field, dq connection
 
 section .text
@@ -70,99 +71,95 @@ http_handler: ; (u32 fd)
     mov rbp, rsp
 
     sub rsp, 128
-    mov [rbp-8], rdi ; [rbp-8]=fd
-    ; [rbp-16]=buf
-    ; [rbp-56]=request
-    ; [rbp-64]=offseted_buf
-    ; [rbp-72]=buf_len
+    ; [rbp-24]=reader
+    ; [rbp-64]=request
     ; [rbp-96]=body
     ; [rbp-120]=headers
     ; [rbp-128]=current_header
 
-    mov rdi, 1024
-    call malloc
-
-    mov [rbp-16], rax
+    mov esi, edi
+    lea rdi, [rbp-24]
+    call bfr_init
 
 ; main loop
 .loop:
-    ; read a request
-    mov rax, 0 ; sys_read
-    mov edi, [rbp-8] ; fd
-    mov rsi, [rbp-16] ; buf
-    mov rdx, 1023 ; len-1 to store a zero at the end
-    syscall
+    lea rdi, [rbp-24]
+    call bfr_fill_buf
 
     test rax, rax
     js .error
     jz .exit ; connection closed
 
-    mov [rbp-72], rax ; save buf_len
-    ; null terminate the buf
-    mov rdi, [rbp-16]
-    mov byte [rdi+rax], 0
-
     ; parse status line
     
     ; read the method
-    mov rdi, [rbp-16]
+    lea rdi, [rbp-24]
     mov sil, ' '
-    call strchr
+    call bfr_read_until
 
     test rax, rax
+    js .error
     jz .bad_request
 
-    ; put a zero where there was a space
-    mov byte [rax], 0
+    ; replace the last char with zero
+    dec rdx
+    mov byte [rdx+rax], 0
 
-    mov rdi, [rbp-16]
-    mov [rbp-56+HttpRequest.method], rdi ; save the method
-    inc rax
-    mov [rbp-64], rax, ; save the offset
+    mov [rbp-64+HttpRequest.method], rax ; save the method
 
     ; read the path
-    mov rdi, [rbp-64]
+    lea rdi, [rbp-24]
     mov sil, ' '
-    call strchr
+    call bfr_read_until
 
     test rax, rax
+    js .error
     jz .bad_request
 
-    ; put a zero where there was a space
-    mov byte [rax], 0
+    ; replace the last char with zero
+    dec rdx
+    mov byte [rdx+rax], 0
 
-    mov rdi, [rbp-64]
-    mov [rbp-56+HttpRequest.path], rdi
-    inc rax
-    mov [rbp-64], rax, ; save the offset
+    mov [rbp-64+HttpRequest.path], rax
 
     ; read the ver
-    mov rdi, [rbp-64]
+    lea rdi, [rbp-24]
     mov sil, `\r`
-    call strchr
+    call bfr_read_until
 
     test rax, rax
+    js .error
     jz .bad_request
 
-    ; put a zero where there was a new line
-    mov byte [rax], 0
+    ; replace the last char with zero
+    dec rdx
+    mov byte [rdx+rax], 0
 
-    mov rdi, [rbp-64]
-    mov [rbp-56+HttpRequest.ver], rdi
-    add rax, 2
-    mov [rbp-64], rax, ; save the offset
+    mov [rbp-64+HttpRequest.ver], rax
 
+    lea rdi, [rbp-24]
+    mov rsi, 1
+    call bfr_skip
+    
     lea rdi, [rbp-120]
     mov rsi, HttpHeader.size
     call ll_init
-
-    mov rdi, [rbp-64]
-    cmp byte [rdi], `\r`
-    je .no_headers
-
+   
+    lea rax, [rbp-120]
+    mov [rbp-64+HttpRequest.headers], rax
 .header_loop:
-    mov rdi, [rbp-64]
-    cmp byte [rdi], `\r`
+    ; TODO upate this part and those after to use the new BufferedFileReader
+    lea rdi, [rbp-24]
+    lea rsi, [rbp-128]; use current header as buffer for bfr peak
+    mov rdx, 1
+    call bfr_peek
+    
+    test rax, rax
+    js .error
+    jz .bad_request
+
+    mov dil, [rbp-128]
+    cmp dil, `\r`
     je .header_loop_end
 
     lea rdi, [rbp-120]
@@ -170,82 +167,96 @@ http_handler: ; (u32 fd)
     call ll_push_back
     mov [rbp-128], rax
     
-    mov rdi, [rbp-64]
-    mov sil, ":"
-    call strchr
+    lea rdi, [rbp-24]
+    mov sil, `:`
+    call bfr_read_until
     
     test rax, rax
+    js .error
     jz .bad_request
-    
-    mov byte [rax], 0
+
+    dec rdx
+    mov byte [rdx+rax], 0
 
     mov rsi, [rbp-128]
-    mov [rsi+HttpHeader.field], rdi
-    inc rax
-    mov [rbp-64], rax
-    
-    lea rdi, [rax+1]
-    cmp byte [rax], ' '
-    cmovne rdi, rax
-    mov [rbp-64], rdi
+    mov [rsi+HttpHeader.field], rax
 
+    lea rdi, [rbp-24]
     mov sil, `\r`
-    call strchr
-
+    call bfr_read_until
+    
     test rax, rax
+    js .error
     jz .bad_request
 
-    mov byte [rax], 0
-    
-    mov rdi, [rbp-64]
+    dec rdx
+    mov byte [rdx+rax], 0
+
     mov rsi, [rbp-128]
-    mov [rsi+HttpHeader.value], rdi
-    add rax, 2
-    mov [rbp-64], rax
+    mov [rsi+HttpHeader.value], rax
+
+    lea rdi, [rbp-24]
+    mov rsi, 1
+    call bfr_skip
 
     jmp .header_loop
-.no_headers:
-    mov qword [rbp-56+HttpRequest.headers], 0
 .header_loop_end:
-    add qword [rbp-64], 2
-    mov rdi, [rbp-64]
+    lea rdi, [rbp-24]
+    mov rsi, 2
+    call bfr_skip
     
-    mov al, [rdi]
-    test al, al 
-    jz .no_body
+    ; TODO: check if there is a body
 
     lea rax, [rbp-96]
     mov [rbp-56+HttpRequest.body], rax
-    mov [rax+HttpBody.ptr], rdi
-    
-    call strlen
-    mov [rbp-96+HttpBody.len], rax
+
+    ; TODO: support reading content lenght instead
+    mov rdi, BFR_MAX_BUFSIZE
+    call malloc
+
+    mov [rbp-96+HttpBody.ptr], rax
+
+    lea rdi, [rbp-24]
+    mov rsi, rax
+    mov rdx, BFR_MAX_BUFSIZE-1
+    call bfr_read
+
+    test rax, rax
+    js .error
+
+    ; put a zero after the body
+    mov rdi, [rbp-96+HttpBody.ptr]
+    mov byte [rdi+rdx], 0
+
+    mov [rbp-96+HttpBody.len], rdx
     
     jmp .body_parse_end
 .no_body:
-    mov qword [rbp-56+HttpRequest.body], 0
+    mov qword [rbp-64+HttpRequest.body], 0
 
 .body_parse_end:
     ; log request
     mov rdi, recived_msg
     call print
 
-    mov rdi, [rbp-56+HttpRequest.method]
+    mov rdi, [rbp-64+HttpRequest.method]
     call print
 
     mov dil, ' '
     call putchar
 
-    mov rdi, [rbp-56+HttpRequest.path]
+    mov rdi, [rbp-64+HttpRequest.path]
     call print
 
     mov dil, 10
     call putchar
 
     ; call the handler
-    mov edi, [rbp-8]
-    lea rsi, [rbp-56]
+    lea edi, [rbp-24+BufferedFileReader.fd]
+    lea rsi, [rbp-64]
     call [handler]
+
+    ; TODO free the resqest data
 
     lea rdi, [rbp-120]
     call ll_clear
@@ -255,6 +266,9 @@ http_handler: ; (u32 fd)
     jmp .exit
 
 .error:
+    cmp rax, EFBIG
+    je .bad_request
+
     mov rdi, rax
     call printi
     jmp .exit
@@ -263,14 +277,15 @@ http_handler: ; (u32 fd)
     call send_bad_request
 .exit:
     ; free the buffer
-    mov rdi, [rbp-16]
-    call free
+    lea rdi, [rbp-24]
+    call bfr_free
 
     mov rsp, rbp
     pop rbp
 
     ret
 
+; TODO: write directly instead of computing size then mallocing a buffer
 http_send_responce: ; (u32 fd, HttpResponce*)
     push rbp
     mov rbp, rsp
