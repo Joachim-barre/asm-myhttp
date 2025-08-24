@@ -218,6 +218,8 @@ bfr_peek:
     add rsi, [rdi+BufferedFileReader.buffer]
     mov rdi, [rbp-16]
     call memcpy
+
+    mov rax, [rbp-24]
 .exit:
     mov rsp, rbp
     pop rbp
