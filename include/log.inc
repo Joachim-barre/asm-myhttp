@@ -47,7 +47,7 @@
 %endmacro
 
 %macro log 3+
-format is, {"[", %str(%1), "]"}, %2, %3
+format is, {"[", %str(%1), "]: "}, %2, %3
 %endmacro
 
 %macro info 2+
