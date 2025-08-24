@@ -53,8 +53,7 @@ main: ; () -> int
 
     call heap_init
 
-    mov rdi, start_msg
-    call print
+    info is, start_msg
 
     call [app+App.init_callback]
 
