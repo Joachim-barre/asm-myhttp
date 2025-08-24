@@ -447,8 +447,6 @@ stoi:
     add rax, rcx
 
     ; loop again
-    jmp .loop
-
 .skip_char:
     inc rdi
     jmp .loop
