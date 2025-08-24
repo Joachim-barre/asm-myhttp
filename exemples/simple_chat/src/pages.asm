@@ -10,6 +10,8 @@ section .data
     PAGE_FILE index_js, "GET", "/static/index.js", "static/index.js"
 
     PAGE_CALLBACK events, "GET", "/events", events_callback
+    PAGE_CALLBACK send, "POST", "/send", send_callback
 
 section .text
     extern events_callback
+    extern send_callback
