@@ -12,6 +12,8 @@ section .text
     global memmove
     global strcmp
     global stoi
+    global ltos
+    global printl
 
 strrev: 
 	push rbp
