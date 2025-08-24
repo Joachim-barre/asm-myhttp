@@ -54,7 +54,7 @@ main: ; () -> int
 
     call heap_init
 
-    info is, start_msg
+    info s, start_msg
 
     call [app+App.init_callback]
 
