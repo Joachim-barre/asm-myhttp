@@ -51,14 +51,14 @@
 %endmacro
 
 %ifenv %!LOG_LEVEL
-    %defstr LOG_LEVEL_STR, %!LOG_LEVEL
+    %defstr LOG_LEVEL_STR %!LOG_LEVEL
     %ifidn LOG_LEVEL_STR, "INFO"
         %define LOG_LEVEL 0
     %elifidn LOG_LEVEL_STR, "WARN"
         %define LOG_LEVEL 1
-    %elifidnLOG_LEVEL_STR, "ERROR"
+    %elifidn LOG_LEVEL_STR, "ERROR"
         %define LOG_LEVEL 2
-    %elifidnLOG_LEVEL_STR, "NONE"
+    %elifidn LOG_LEVEL_STR, "NONE"
         %define LOG_LEVEL 3
     %else
         %warning %strcat("invalid log level : ", LOG_LEVEL_STR)
