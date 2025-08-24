@@ -42,6 +42,7 @@
             format_ip %2 
         %elifidn %1, nop
         %else
+            %warning %strcat("unknown format : ", %str(%1))
             mov dil, '?'
             call putchar
         %endif
