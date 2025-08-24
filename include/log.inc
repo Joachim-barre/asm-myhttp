@@ -70,20 +70,20 @@
 %define LOG_LEVEL 0
 %endif
 
-%macro log 4+
+%macro log 4+.nolist
 %if %1>=LOG_LEVEL
 format is, {"[", %str(%2), "][", __?FILE?__, ":", %str(__?LINE?__), "]: "}, %3, %4
 %endif
 %endmacro
 
-%macro info 2+
+%macro info 2+.nolist
 log 0, INFO, %1, %2
 %endmacro
 
-%macro warn 2+
+%macro warn 2+.nolist
 log 1, WARN, %1, %2
 %endmacro
 
-%macro error 2+
+%macro error 2+.nolist
 log 2, ERROR, %1, %2
 %endmacro
