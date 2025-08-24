@@ -72,7 +72,7 @@
 
 %macro log 4+
 %if %1>LOG_LEVEL
-format is, {"[", %str(%2), "][", __?FILE?__, ":", %str(__?LINE?__)"]: "}, %3, %4
+format is, {"[", %str(%2), "][", __?FILE?__, ":", %str(__?LINE?__), "]: "}, %3, %4
 %endif
 %endmacro
 
