@@ -6,6 +6,7 @@
 %include "app.inc"
 %include "linkedlist.inc"
 %include "http_fields.inc"
+%include "log.inc"
 
 %define NOT_FOUND_BODY "404 Not Found"
 %strlen NOT_FOUND_BODY_LEN NOT_FOUND_BODY
