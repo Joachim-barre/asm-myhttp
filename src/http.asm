@@ -6,6 +6,7 @@
 %include "linkedlist.inc"
 %include "http_fields.inc"
 %include "io.inc"
+%include "log.inc"
 
 section .bss
     global http_server
@@ -346,17 +347,7 @@ http_handler: ; (u32 fd)
     mov rdi, recived_msg
     call print
 
-    mov rdi, [rbp-64+HttpRequest.method]
-    call print
-
-    mov dil, ' '
-    call putchar
-
-    mov rdi, [rbp-64+HttpRequest.path]
-    call print
-
-    mov dil, 10
-    call putchar
+    info s, recived_msg, c, ' ', s, rbp-64+HttpRequest.method, c, ' ', s, rbp-64+HttpRequest.path, c, `\n`
 
     ; call the handler
     mov edi, [rbp-24+BufferedFileReader.fd]
