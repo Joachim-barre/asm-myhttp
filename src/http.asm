@@ -366,8 +366,11 @@ http_handler: ; (u32 fd)
     cmp rax, EFBIG
     je .bad_request
 
-    mov rdi, rax
-    call printi
+    ; store the error in [rbp-128]
+    mov [rbp-128], rax
+    
+    error is, "error while reading http request : ", i, [rbp-128], c, `\n`
+
     jmp .exit
 .bad_request:
     mov edi, [rbp-8]
