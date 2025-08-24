@@ -2,6 +2,7 @@
 %include "net.inc"
 %include "helpers.inc"
 %include "thread.inc"
+%include "log.inc"
 
 section .bss
     global server
@@ -160,30 +161,14 @@ server_child_handler: ; (u64 fd (zero extended))
     syscall
 
     ; log the request
-    lea rdi, [connection_msg]
-    call print
-
-    mov edi, [rbp-16+SockAddr.addr]
-    mov si, [rbp-16+SockAddr.port]
-    call print_ip_port
-
-    mov dil, 10
-    call putchar
+    info s, connection_msg, ip, {[rbp-16+SockAddr.addr], [rbp-16+SockAddr.port]}, c, `\n`
 
     mov edi, [rbp-28]
     mov rax, [server+Server.handler]
     call rax
 
-    ; log the request
-    lea rdi, [disconnection_msg]
-    call print
-
-    mov edi, [rbp-16+SockAddr.addr]
-    mov si, [rbp-16+SockAddr.port]
-    call print_ip_port
-
-    mov dil, 10
-    call putchar
+    ; log the disconnection
+    info s, disconnection_msg, ip, {[rbp-16+SockAddr.addr], [rbp-16+SockAddr.port]}, c, `\n`
 
     ; close the connection
     mov rax, 3 ; sys_close
