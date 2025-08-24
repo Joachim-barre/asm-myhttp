@@ -4,7 +4,7 @@ LIB=$(LIB_BUILD)/libmyhttp.a
 BUILDDIR=build
 PROG=$(BUILDDIR)/prog
 OBJS=$(BUILDDIR)/main.o $(BUILDDIR)/pages.o
-PAGES=html/index.html static/index.css
+PAGES=html/index.html static/index.css static/index.js
 
 LD=ld
 LDFLAGS=
