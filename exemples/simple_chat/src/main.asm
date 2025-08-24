@@ -13,6 +13,7 @@ section .data
 
 section .text
     required send_with_default_headers
+    global events_callback
 
 init_callback:
     push rbp
@@ -39,3 +40,6 @@ app_main:
     pop rbp
 
     ret
+
+events_callback: ;  (HttpRequest*, int fd)
+    ret ; TODO
