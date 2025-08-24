@@ -1,3 +1,24 @@
 h1 {
     text-align: center;
 }
+
+#messages {
+    margin: 10px;
+    border: 2px solid black;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#messages > li {
+    margin: 5px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.message_recived {
+    background-color: #7AFFAD
+}
+
+.message_sent {
+    background-color: #7ACCFF
+}
