@@ -153,7 +153,77 @@ itos: ;(char* buf, size_t lenght, int value, bool signed) -> char*
 	pop rbp
 
 	ret
-	
+
+ltos: ;(char* buf, size_t lenght, u64 value) -> char*
+	push rbp
+	mov rbp, rsp
+	sub rsp, 32
+
+	mov [rbp-8], rdi
+	mov [rbp-16], rsi
+	mov [rbp-24], rdx
+	mov qword [rbp-32], 0
+
+	cmp rsi, 2
+	jl .err
+.L0:
+	mov rdi, [rbp-24]
+	test rdi, rdi
+	jnz .loop
+
+	mov rdi, [rbp-8]
+	mov rdx, [rbp-32]
+	mov byte [rdi+rdx], '0'
+
+	inc qword [rbp-32]
+
+	jmp .ok
+
+.loop:
+	xor rdx, rdx
+	mov rax, [rbp-24]
+	mov rdi, 10
+	div rdi
+
+	mov [rbp-24], rax
+
+	add dl, '0'
+	mov rdi, [rbp-8]
+	mov rsi, [rbp-32]
+	mov [rdi+rsi], dl
+
+	inc qword [rbp-32]
+
+	test eax, eax
+	jz .ok
+
+	mov rdi, [rbp-32]
+	sub rdi, [rbp-16]
+	cmp rdi, -2
+	jg .err
+
+	jmp .loop
+
+.ok:
+	mov rdi, [rbp-8]
+	mov rdx, [rbp-32]
+	mov byte [rdi+rdx], 0
+
+	call strrev
+	mov [rbp-8], rax
+
+	jmp .exit
+
+.err:
+	mov qword [rbp-8], 0
+	jmp .exit
+.exit:
+	mov rax, [rbp-8]
+
+	mov rsp, rbp
+	pop rbp
+
+	ret
 
 putchar:
 	push rbp
@@ -223,6 +293,23 @@ printi:
 	mov ecx, esi
 	lea rdi, [rbp-16]
 	mov rsi, 16
+	call itos
+
+	mov rdi, rax
+	call print
+
+	mov rsp, rbp
+	pop rbp
+	ret
+
+printl:
+	push rbp
+	mov rbp, rsp
+	sub rsp, 32
+
+	mov rdx, rdi
+	lea rdi, [rbp-32]
+	mov rsi, 32
 	call itos
 
 	mov rdi, rax

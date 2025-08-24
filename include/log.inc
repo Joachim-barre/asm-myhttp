@@ -35,6 +35,13 @@
                 mov edi, %2
                 call printi
             %endif
+        %elifidn %1, l
+            %ifnum %2
+                print_inline %str(%2)
+            %else
+                mov rdi, %2
+                call printl
+            %endif
         %elifidn %1, c
             mov dil, %2
             call putchar
