@@ -50,18 +50,40 @@
     %endrep
 %endmacro
 
-%macro log 3+
-format is, {"[", %str(%1), "][", __?FILE?__, ":", %str(__?LINE?__)"]: "}, %2, %3
+%ifenv %!LOG_LEVEL
+    %defstr LOG_LEVEL_STR, %!LOG_LEVEL
+    %ifidn LOG_LEVEL_STR, "INFO"
+        %define LOG_LEVEL 0
+    %elifidn LOG_LEVEL_STR, "WARN"
+        %define LOG_LEVEL 1
+    %elifidnLOG_LEVEL_STR, "ERROR"
+        %define LOG_LEVEL 2
+    %elifidnLOG_LEVEL_STR, "NONE"
+        %define LOG_LEVEL 3
+    %else
+        %warning %strcat("invalid log level : ", LOG_LEVEL_STR)
+        %define LOG_LEVEL 0
+        %defstr LOG_LEVEL_STR INFO
+    %endif
+%else
+%define LOG_LEVEL_STR "INFO"
+%define LOG_LEVEL 0
+%endif
+
+%macro log 4+
+%if %1>LOG_LEVEL
+format is, {"[", %str(%2), "][", __?FILE?__, ":", %str(__?LINE?__)"]: "}, %3, %4
+%endif
 %endmacro
 
 %macro info 2+
-log INFO, %1, %2
+log 0, INFO, %1, %2
 %endmacro
 
 %macro warn 2+
-log WARN, %1, %2
+log 1, WARN, %1, %2
 %endmacro
 
 %macro error 2+
-log ERROR, %1, %2
+log 2, ERROR, %1, %2
 %endmacro
