@@ -10,7 +10,7 @@ body {
 
 .encoder {
     width: 50%;
-    height: 25%;
+    min_height: 25%;
     padding: 5px;
     border: 2px solid black;
     text-align: center;
@@ -18,7 +18,7 @@ body {
 
 .decoder {
     width: 50%;
-    height: 25%;
+    min_height: 25%;
     padding: 5px;
     border: 2px solid black;
     text-align: center;
