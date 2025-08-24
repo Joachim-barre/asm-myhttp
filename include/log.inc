@@ -12,6 +12,12 @@
     call print
 %endmacro
 
+%macro format_ip 2
+    mov edi, %1
+    mov si, %2
+    call print_ip_port
+%endmacro
+
 %macro format 2-*
     %rep %0/2
         %ifidn %1, s
@@ -29,6 +35,9 @@
         %elifidn %1, c
             mov dil, %2
             call putchar
+        %elifidn %1, ip
+            format_ip %2 
+        %elifidn %1, nop
         %else
             mov dil, '?'
             call putchar
