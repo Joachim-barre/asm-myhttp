@@ -312,7 +312,7 @@ printl:
 	mov rdx, rdi
 	lea rdi, [rbp-32]
 	mov rsi, 32
-	call itos
+	call ltos
 
 	mov rdi, rax
 	call print
