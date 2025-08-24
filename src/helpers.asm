@@ -196,7 +196,7 @@ ltos: ;(char* buf, size_t lenght, u64 value) -> char*
 
 	inc qword [rbp-32]
 
-	test eax, eax
+	test rax, rax
 	jz .ok
 
 	mov rdi, [rbp-32]
