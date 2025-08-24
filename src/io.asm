@@ -295,17 +295,16 @@ bfr_read_until:
 
     sub rsp, 32
     mov [rbp-8], rdi ; [rbp-8]=self
-    mov edx, [rdi+BufferedFileReader.buffer_offset]
-    mov [rbp-12], edx ; offset then size
+    mov dword [rbp-12], 0 ; offset then size
     mov [rbp-13], sil ; [rbp-13]=chr
     ; [rbp-24]=buffer
 .loop:
     mov rax, [rbp-8]
     mov edi, [rbp-12]
+    add edi, [rax+BufferedFileReader.buffer_offset]
     add rdi, [rax+BufferedFileReader.buffer]
     mov sil, [rbp-13]
     mov edx, [rax+BufferedFileReader.buffer_data_size]
-    add edx, [rax+BufferedFileReader.buffer_offset] ; since [rbp-12] include it but not data size
     sub edx, [rbp-12]
     add [rbp-12], edx ; update the offset
     call memchr
@@ -336,7 +335,7 @@ bfr_read_until:
     add rdi, rax
     sub rdi, [rdx+BufferedFileReader.buffer]
     mov [rbp-12], edi
-    add rdi, 1 ; for null terminator
+    inc rdi  ; for null terminator
     call malloc
 
     mov [rbp-24], rax 
