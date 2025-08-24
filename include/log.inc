@@ -23,6 +23,9 @@
         %ifidn %1, s
             lea rdi, [%2]
             call print
+        %elifidn %1, sp
+            mov rdi, %2
+            call print
         %elifidn %1, is
             print_inline %2
         %elifidn %1, i

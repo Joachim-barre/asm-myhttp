@@ -347,7 +347,7 @@ http_handler: ; (u32 fd)
     mov rdi, recived_msg
     call print
 
-    info s, recived_msg, c, ' ', s, rbp-64+HttpRequest.method, c, ' ', s, rbp-64+HttpRequest.path, c, `\n`
+    info s, recived_msg, c, ' ', sp, [rbp-64+HttpRequest.method], c, ' ', sp, [rbp-64+HttpRequest.path], c, `\n`
 
     ; call the handler
     mov edi, [rbp-24+BufferedFileReader.fd]
