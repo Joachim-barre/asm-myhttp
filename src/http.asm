@@ -391,7 +391,7 @@ http_handler: ; (u32 fd)
     ; store the error in [rbp-128]
     mov [rbp-128], rax
     
-    error is, "error while reading http request : ", i, [rbp-128], c, `\n`
+    error is, "error while reading http request : ", l, [rbp-128], c, `\n`
 
     jmp .exit
 .bad_request:
