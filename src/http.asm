@@ -159,12 +159,13 @@ http_handler: ; (u32 fd)
     push rbp
     mov rbp, rsp
 
-    sub rsp, 128
+    sub rsp, 144
     ; [rbp-24]=reader
     ; [rbp-64]=request
     ; [rbp-96]=body
     ; [rbp-120]=headers
     ; [rbp-128]=current_header
+    ; [rbp-136]=tmp
 
     mov esi, edi
     lea rdi, [rbp-24]
@@ -279,6 +280,28 @@ http_handler: ; (u32 fd)
     mov rsi, [rbp-128]
     mov [rsi+HttpHeader.field], rax
 
+    ; check if there is a space and skip it if needed
+    lea rdi, [rbp-24]
+    lea rsi, [rbp-136]
+    mov rdx, 1
+    call bfr_peek
+
+    test rax, rax
+    js .error
+    jz .bad_request
+
+    mov dil, [rbp-136]
+    cmp dil, ' '
+    jne .header_loop_no_space
+
+    lea rdi, [rbp-24]
+    mov rsi, 1
+    call bfr_skip
+
+    test rax, rax
+    js .error
+    jz .bad_request
+.header_loop_no_space:
     lea rdi, [rbp-24]
     mov sil, `\r`
     call bfr_read_until
