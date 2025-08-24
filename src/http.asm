@@ -338,6 +338,8 @@ http_handler: ; (u32 fd)
 
     mov [rbp-96+HttpBody.len], rax
 
+    ; info s, content_lenght, is, ": ", i, [rbp-96+HttpBody.len], c, `\n`
+
     lea rdi, [rbp-96]
     mov [rbp-64+HttpRequest.body], rdi
 
