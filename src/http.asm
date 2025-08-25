@@ -615,7 +615,12 @@ http_send_responce: ; (u32 fd, HttpResponce*)
     add qword [rbp-64], rax
     call memcpy
 
+    jmp .end
 .no_body_str:
+    mov rdi, [rbp-64]
+    mov word [rdi], `\r\n`
+    add qword [rbp-64], 2
+.end:
     ; write the responce to the socket
     mov rax, 1 ; sys_write
     mov rdi, [rbp-20] ; fd
