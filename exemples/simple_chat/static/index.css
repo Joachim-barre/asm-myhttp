@@ -1,5 +1,18 @@
-h1 {
+.title {
     text-align: center;
+}
+
+body {
+    height: 100vh;
+    margin: 0;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    /* align-items: stretch; */
+    justify-content: stretch;
+    height: 100%;
 }
 
 #messages {
@@ -7,6 +20,7 @@ h1 {
     border: 2px solid black;
     list-style-type: none;
     padding-left: 0;
+    flex: auto;
 }
 
 #messages > li {
@@ -16,9 +30,11 @@ h1 {
 }
 
 .message_recived {
-    background-color: #7AFFAD
+    background-color: #7AFFAD;
+    text-align: left;
 }
 
 .message_sent {
-    background-color: #7ACCFF
+    background-color: #7ACCFF;
+    text-align: right;
 }
