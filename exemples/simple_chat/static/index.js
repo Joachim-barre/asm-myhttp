@@ -1,13 +1,12 @@
-document.getELementById("send").addEventListener("submit", function (event) {
+document.getElementById("send_form").addEventListener("submit", function (event) {
     event.preventDefault();
 
     var formData = new FormData(this);
 
-    fetch("/encode", {
+    fetch("/send", {
         method: "POST",
             body: formData.get("to_send")
         })
-    .then(response => response.text())
     .catch(error => {
         console.error("Error:", error);
     });
