@@ -3,7 +3,7 @@
 section .data
     global pages
 
-    pages: dq index, index_css, index_js, 0 ; Page** (page array)
+    pages: dq index, index_css, index_js, send, events, 0 ; Page** (page array)
 
     PAGE_FILE index, "GET", "/", "html/index.html" 
     PAGE_FILE index_css, "GET", "/static/index.css", "static/index.css"
