@@ -41,7 +41,7 @@ init_callback:
     push rbp
     mov rbp, rsp
 
-    info is, {"Initalizing the main app thread", 10}
+    info is, "Initalizing the main app thread", c, 10
 
     mov rdi, app_main
     mov rsi, 0
@@ -56,7 +56,7 @@ app_main:
     push rbp
     mov rbp, rsp
 
-    info is, {"the app's main thread is running", 10}
+    info is, "the app's main thread is running", c, 10
 
     mov rsp, rbp
     pop rbp
