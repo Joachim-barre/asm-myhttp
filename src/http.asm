@@ -175,6 +175,7 @@ http_handler: ; (u32 fd)
 .loop:
     ; initialise every field of the request to zero
     mov qword [rbp-64+HttpRequest.method], 0
+    mov qword [rbp-64+HttpRequest.path], 0
     mov qword [rbp-64+HttpRequest.headers], 0
     mov qword [rbp-64+HttpRequest.ver], 0
     mov qword [rbp-64+HttpRequest.body], 0
