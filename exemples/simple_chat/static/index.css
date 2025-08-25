@@ -17,6 +17,7 @@ body {
 
 #messages {
     margin: 10px;
+    margin-bottom: 0px;
     border: 2px solid black;
     list-style-type: none;
     padding-left: 0;
@@ -37,4 +38,16 @@ body {
 .message_sent {
     background-color: #7ACCFF;
     text-align: right;
+}
+
+#send_form {
+    margin: 10px;
+    margin-top: 0px;
+    border: 2px solid black;
+    display: flex;
+    flex-direction: row;
+}
+
+#send_form #to_send {
+    width: 100%;
 }
