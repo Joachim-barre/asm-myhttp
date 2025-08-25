@@ -8,6 +8,7 @@
 </head>
 
 <body>
+    <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
     <div class="main">
         <h1 class="title">Simple chat</h1>
 
@@ -21,7 +22,7 @@
             </li>
         </ul>
 
-        <form method="post", id="send_form", action="/send">
+        <form method="post", id="send_form", action="/send", target="dummyframe">
             <input type="text" id="to_send" name="to_send", value="Hello"><ibr>
             <input type="submit" value="Send">
         </form>
