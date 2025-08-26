@@ -11,7 +11,13 @@
 %define NOT_FOUND_BODY "404 Not Found"
 %strlen NOT_FOUND_BODY_LEN NOT_FOUND_BODY
 
+section .bss
+    argc: resq 1
+    argv: resq 1
+
 section .data
+    global argv
+    global argc
     extern app
 
     start_msg: db "starting the server", 10, 0
@@ -32,17 +38,113 @@ section .data
         at HttpHeader.field, dq connection
         at HttpHeader.value, dq connection_close
     iend
+    port_arg: db "-p", 0
+    help_arg: db "-h", 0
+    help: db "My Http Web Server:", 10
+    usage: db "usage : server [-p port][-h]", 10, 0
+    arg_error: db "error: bad argument : ", 0
+    port_arg_error: db "error: -p with no or an invalid port", 10, 0
+
 
 section .text
     global _start
+    global default_argument_parsing
 
 _start:
+    mov rdi, [rsp]
+    mov [argc], rdi
+
+    lea rsi, [rsp+8]
+    mov [argv], rsi
 
     call main
 
     mov rdi, rax ; set the exit code to the value returned by main
     mov rax, 60 ; sys_exit
     syscall
+
+default_argument_parsing:
+    push rbp
+    mov rbp, rsp
+
+    sub rsp, 16
+    mov qword [rbp-8], 1 ; [rbp-8]=current_arg
+.loop:
+    mov rdi, [rbp-8]
+    cmp rdi, [argc]
+    jge .end
+
+
+    mov rsi, [argv]
+    mov rdi, [rsi+rdi*8]
+    lea rsi, [port_arg]
+    call strcmp
+    test rax, rax
+    jz .port
+    
+    mov rsi, [argv]
+    mov rdi, [rbp-8]
+    mov rdi, [rsi+rdi*8]
+    lea rsi, [help_arg]
+    call strcmp
+    test rax, rax
+    jz .show_help
+
+    lea rdi, [arg_error]
+    call print
+
+    mov rdi, [rbp-8]
+    mov rsi, [argv]
+    mov rdi, [rsi+rdi*8]
+    call print
+
+    mov dil, 10
+    call putchar 
+
+    lea rdi, [usage]
+    call print
+
+    mov rdi, 255
+    call .exit
+.show_help:
+    lea rdi, [help]
+    call print
+
+    mov rdi, 0
+.exit:
+    mov rax, 60 ; sys_exit
+    syscall 
+.port:
+    inc qword [rbp-8]
+    mov rdi, [rbp-8]
+    cmp rdi, [argc]
+    jge .port_arg_error
+
+    mov rsi, [argv]
+    mov rdi, [rsi+rdi*8]
+    call stoi
+
+    cmp rax, 1<<16
+    ja .port_arg_error
+
+    mov [app+App.server_config+ServerConfig.port], ax 
+
+    inc qword [rbp-8]
+    jmp .loop
+.port_arg_error:
+    lea rdi, [port_arg_error]
+    call print
+
+    lea rdi, [usage]
+    call print
+
+    mov rdi, 255
+    call .exit
+.end:
+    mov rsp, rbp
+    pop rbp
+
+    ret
 
 main: ; () -> int
     ; setup the stack frame
@@ -58,8 +160,8 @@ main: ; () -> int
 
     call [app+App.init_callback]
 
-    mov di, 0 ; let the os choose the port
-    mov esi, 0 ; all interfaces
+    movbe di, [app+App.server_config+ServerConfig.port]
+    movbe esi, [app+App.server_config+ServerConfig.address]
     lea rdx, [request_handler]
     call http_init
 

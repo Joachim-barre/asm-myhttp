@@ -19,7 +19,7 @@ clean:
 	rm -r $(BUILDDIR)
 
 run: $(PROG)
-	chmod +x $(PROG) && ./$(PROG)
+	chmod +x $(PROG) && ./$(PROG) $(ARGS)
 
 $(BUILDDIR):
 	mkdir $(BUILDDIR)
