@@ -34,12 +34,15 @@ section .data
 
 section .text
     required send_with_default_headers
+    extern default_argument_parsing
     global events_callback
     global send_callback
 
 init_callback:
     push rbp
     mov rbp, rsp
+
+    call default_argument_parsing
 
     info is, "Initalizing the main app thread", c, 10
 
