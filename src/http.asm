@@ -353,11 +353,13 @@ http_handler: ; (u32 fd)
     lea rdi, [rbp-24]
     mov rsi, rax
     mov rdx, [rbp-96+HttpBody.len]
+    test rdx, rdx
+    jz .zero_sized_body
     call bfr_read_all
 
     test rax, rax
     js .error
-
+.body_read_after:
     ; put a zero after the body
     mov rdi, [rbp-96+HttpBody.ptr]
     mov byte [rdi+rdx], 0
@@ -365,6 +367,10 @@ http_handler: ; (u32 fd)
     mov [rbp-96+HttpBody.len], rdx
     
     jmp .body_parse_end
+.zero_sized_body:
+    xor rdx, rdx
+
+    jmp .body_read_after
 .no_body:
     mov qword [rbp-64+HttpRequest.body], 0
 
