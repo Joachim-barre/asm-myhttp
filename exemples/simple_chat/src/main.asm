@@ -290,6 +290,7 @@ send_callback: ; (HttpRequest*, int fd)
     mov rdi, [rdi+HttpRequest.body]
     mov rdi, [rdi+HttpBody.len]
     mov [message+8], rdi ; save the lenght
+    inc rdi ; add one byte for the null terminator
     call malloc
 
     mov [message], rax ; save the pointer
@@ -301,6 +302,10 @@ send_callback: ; (HttpRequest*, int fd)
     mov rsi, [rsi+HttpBody.ptr]
     mov rdx, [message+8]
     call memcpy
+
+    mov rdi, [message]
+    mov rsi, [message+8]
+    mov byte [rdi+rsi], 0
 
     ; mark as read ready
     mov dword [message_state], 2
