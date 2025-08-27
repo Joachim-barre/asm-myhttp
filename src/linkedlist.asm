@@ -16,6 +16,7 @@ section .text
     global ll_pop_back
     global ll_iter
     global ll_iter_next
+    global ll_iter_remove_next
     global ll_find
 
 ll_init:
