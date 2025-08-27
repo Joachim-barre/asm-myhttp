@@ -4,7 +4,7 @@ const messageList = document.getElementById("messages");
 function appendMessage(message, is_sent) {
     if (is_sent){
         lastSent = message
-    } else if (lastSent == e.data) {
+    } else if (lastSent == message) {
         lastSent = ""
         return
     }
@@ -32,7 +32,7 @@ document.getElementById("send_form").addEventListener("submit", function (event)
 
     fetch("/send", {
         method: "POST",
-            body: formData.get("message")
+            body: message
         })
     .catch(error => {
         console.error("Error:", error);
