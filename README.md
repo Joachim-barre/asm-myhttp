@@ -5,10 +5,10 @@ this project is a simple (pretty unstable) webserver written in x64 assembly tha
 the project is design so that the compiled program can run by itself and doesn't depend on any other file<br>
 the exemple each compile to the following sizes:
 |path|description|size before ```strip```|size after ```strip```|
-|--|--|--|
+|--|--|--|--|
 | ```exemples/hello``` |as simple webpage with a css file| 36K | 16K |
-| ```exemples/emojify``` |a port of my [other project]()| 40K | 20K |
-| ```exemples/simple_chat``` | 40K | 20K |
+| ```exemples/emojify``` |a port of my [other project](https://github.com/Joachim-barre/emojify)| 40K | 20K |
+| ```exemples/simple_chat``` |a simple chat app (no authentification or username) that uses Server Sent events| 40K | 20K |
 
 
 ## building the project
