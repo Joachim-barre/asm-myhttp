@@ -44,7 +44,12 @@ section .data
     usage: db "usage : server [-p port][-h]", 10, 0
     arg_error: db "error: bad argument : ", 0
     port_arg_error: db "error: -p with no or an invalid port", 10, 0
-
+    sigpipe_act:
+        dq 1 ; sa_handler=SIG_ING
+        dq 0 ; sa_sigaction should not be set when setting sa_handler
+        times 128 db 0 ; sa_mask is 128 0s 
+        dd 0 ; flags=0
+        dq 0 ; sa_restorer=Null
 
 section .text
     global _start
@@ -155,6 +160,13 @@ main: ; () -> int
     ; [rbp-8] server
 
     call heap_init
+
+    ; ignore sigpipe
+    mov rax, 13 ; sys_rt_sigaction
+    mov rdi, 13 ; SIGPIPE
+    lea rsi, [sigpipe_act]
+    xor rdx, rdx ; oldact=NULL
+    syscall
 
     info s, start_msg
 
