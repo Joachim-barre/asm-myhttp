@@ -5,6 +5,7 @@
 %include "linkedlist.inc"
 %include "http.inc"
 %include "http_fields.inc"
+%include "mem.inc"
 
 section .data
     global app
@@ -64,6 +65,9 @@ section .bss
 
     listeners_inner: resb LinkedList.size
 
+    message: resq 2 ; (char*, u64)
+    message_state: resd 1 ; int -> 0 == available for write, 1 == writing, 2 == ready to read
+
 section .text
     required send_with_default_headers
     extern default_argument_parsing
@@ -105,7 +109,28 @@ app_main:
     lea rsi, [listeners_inner]
     call spin_init
 
+    mov dword [message_state], 0
 .loop:
+    mov edi, [message_state]
+    cmp edi, 2
+    jne .loop
+
+    lea rdi, [listeners]
+    call spin_lock
+
+    info is, "sending the message to the clients : ", sp, [message], c, 10
+    
+    ; TODO
+
+    mov rdi, [message]
+    call free
+
+    lea rdi, [listeners]
+    call spin_unlock
+    
+    mov dword [message_state], 0
+
+    jmp .loop
 
     mov rsp, rbp
     pop rbp
@@ -174,6 +199,32 @@ send_callback: ; (HttpRequest*, int fd)
     mov [rbp-24], rdi
 
     info is, "recived message : ", sp, [rbp-24], c, 10
+.wait_loop:
+    mov eax, 0
+    mov edi, 1
+    lock cmpxchg [message_state], edi
+
+    jnz .wait_loop ; ZF=0 if cmpxchg fails
+
+    ; copy the data to another buffer
+    mov rdi, [rbp-8]
+    mov rdi, [rdi+HttpRequest.body]
+    mov rdi, [rdi+HttpBody.len]
+    mov [message+8], rdi ; save the lenght
+    call malloc
+
+    mov [message], rax ; save the pointer
+
+    ; copy the data
+    mov rdi, rax
+    mov rsi, [rbp-8]
+    mov rsi, [rsi+HttpRequest.body]
+    mov rsi, [rsi+HttpBody.ptr]
+    mov rdx, [message+8]
+    call memcpy
+
+    ; mark as read ready
+    mov dword [message_state], 2
 .no_body:
     mov edi, [rbp-12]
     lea rsi, [send_responce]
