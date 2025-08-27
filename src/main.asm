@@ -46,10 +46,9 @@ section .data
     port_arg_error: db "error: -p with no or an invalid port", 10, 0
     sigpipe_act:
         dq 1 ; sa_handler=SIG_ING
-        dq 0 ; sa_sigaction should not be set when setting sa_handler
-        times 128 db 0 ; sa_mask is 128 0s 
-        dd 0 ; flags=0
+        dq 0 ; flags=0
         dq 0 ; sa_restorer=Null
+        times 128 db 0 ; sa_mask is 128 0s
 
 section .text
     global _start
@@ -166,6 +165,7 @@ main: ; () -> int
     mov rdi, 13 ; SIGPIPE
     lea rsi, [sigpipe_act]
     xor rdx, rdx ; oldact=NULL
+    mov r10, 8 ; sigsetsize=0
     syscall
 
     info s, start_msg
