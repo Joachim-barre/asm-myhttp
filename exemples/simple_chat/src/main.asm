@@ -59,11 +59,18 @@ section .data
         at HttpHeader.value, dq event_stream
     iend
 
+    events_body: istruc HttpBody
+        at HttpBody.ptr, dq events_body.data
+        at HttpBody.len, dq events_body.len
+    iend
+    .data: db `event: connected\r\n\r\n`, 0
+    .len equ $- .data-1
+
     events_responce: istruc HttpResponce
         at .status_code, dd ok_code
         at .status_str, dq ok_str
         at .headers, dq events_headers
-        at .body, dq 0
+        at .body, dq events_body
     iend
 
 section .bss

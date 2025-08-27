@@ -22,3 +22,8 @@ evtSource.onmessage = (e) => {
     newElement.classList.add('message_recived');
     messageList.appendChild(newElement);
 };
+
+evtSource.onconnected = (e) => {
+    console.log("successfuly connected")
+}
+
