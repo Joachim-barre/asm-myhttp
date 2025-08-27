@@ -135,10 +135,17 @@ app_main:
     call ll_iter_next
     test rdx, rdx
     jz .inner_loop_end
-   
+  
+    mov ecx, [rdx]
+    mov [rbp-16], rcx
+    info is, "sending message to fd: ", l, [rbp-16], c, 10
+
+    mov rdi, [rbp-8]
+    call ll_iter_next
+
     mov rax, 1 ; sys_write
     mov edi, [rdx]
-    mov rsi, [data_prefix]
+    lea rsi, [data_prefix]
     mov rdx, data_prefix.len
     syscall
 
@@ -162,7 +169,7 @@ app_main:
 
     mov rax, 1 ; sys_write
     mov edi, [rdx]
-    mov rsi, [data_suffix]
+    lea rsi, [data_suffix]
     mov rdx, data_suffix.len
     syscall
 
