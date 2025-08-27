@@ -40,7 +40,7 @@ section .data
     data_prefix: db "data: ", 0
         .len equ $ -data_prefix-1
 
-    data_suffix: db `\r\n\r\n`, 0
+    data_suffix: db `\n\n`, 0
         .len equ $ -data_suffix-1
 
     content_type: db "Content-Type", 0
@@ -63,7 +63,7 @@ section .data
         at HttpBody.ptr, dq events_body.data
         at HttpBody.len, dq events_body.len
     iend
-    .data: db `event: connected\r\n\r\n`, 0
+    .data: db `event: connected\n\n`, 0
     .len equ $- .data-1
 
     events_responce: istruc HttpResponce
