@@ -22,6 +22,7 @@ body {
     list-style-type: none;
     padding-left: 0;
     flex: auto;
+    overflow: auto;
 }
 
 #messages > li {
