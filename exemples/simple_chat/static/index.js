@@ -1,15 +1,23 @@
 let lastSent = ""
+const messageList = document.getElementById("messages");
 
 document.getElementById("send_form").addEventListener("submit", function (event) {
     event.preventDefault();
 
     var formData = new FormData(this);
+    var message = formData.get("to_send")
 
-    lastSent = formData.get("to_send")
+    lastSent = message
+
+    const newElement = document.createElement("li");
+
+    newElement.textContent = `${message}`;
+    newElement.classList.add('message_sent');
+    messageList.appendChild(newElement);
 
     fetch("/send", {
         method: "POST",
-            body: formData.get("to_send")
+            body: formData.get("message")
         })
     .catch(error => {
         console.error("Error:", error);
@@ -17,7 +25,6 @@ document.getElementById("send_form").addEventListener("submit", function (event)
 });
 
 const evtSource = new EventSource("/events");
-const messageList = document.getElementById("messages");
 
 evtSource.onmessage = (e) => {
     if (lastSent == e.data) {
