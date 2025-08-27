@@ -44,6 +44,8 @@ section .text
     extern ll_pop_back ; (LinkedList*)
     extern ll_iter ; (LinkedList*) -> LinkedListIter*
     extern ll_iter_next ; (LinkedListIter*) -> (LinkedListIter*, void*)
+    ; remove the current element (the one returned by ll_iter_next) and return an iterator to the next one
+    extern ll_iter_remove_next ; (LinkedListIter*, LinkedList*) -> LinkedListIter*
     ; find an item in the list
     ; use the second argument to compare the value by passing the third argument and the current item to it
     ; returns null if not found

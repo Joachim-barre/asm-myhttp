@@ -301,3 +301,64 @@ ll_find:
     pop rbp
 
     ret
+
+ll_iter_remove_next:
+    push rbp
+    mov rbp, rsp
+
+    sub rsp, 16
+    mov [rbp-8], rdi
+
+    test rdi, rdi
+    jz .end
+
+    mov rax, [rsi+LinkedList.front_node]
+    cmp rax, rdi
+    je .front
+
+    mov rax, [rsi+LinkedList.back_node]
+    cmp rax, rdi
+    je .back
+
+    mov rax, [rdi+LLNodeHeader.next]
+    mov rdx, [rdi+LLNodeHeader.prev]
+    mov [rax+LLNodeHeader.prev], rdx
+    mov [rdx+LLNodeHeader.next], rax
+
+    jmp .exit_and_free
+.back:
+    mov rdx, [rdi+LLNodeHeader.prev]
+    mov [rsi+LinkedList.back_node], rdx
+
+    mov qword [rdx+LLNodeHeader.prev], 0
+
+    xor rax, rax
+    jmp .exit_and_free
+.front:
+    mov rax, [rdi+LLNodeHeader.next]
+    mov [rsi+LinkedList.front_node], rax
+
+    test rax, rax
+    jz .empty
+
+    mov qword [rax+LLNodeHeader.prev], 0
+    jmp .exit_and_free
+.empty:
+    xor rax, rax
+    mov [rsi+LinkedList.back_node], rax
+.exit_and_free:
+    mov [rbp-16], rax
+    
+    call free
+
+    mov rax, [rbp-16]
+.exit:
+    mov rsp, rbp
+    pop rbp
+
+    ret
+
+.end:
+    xor rax, rax
+
+    jmp .exit
