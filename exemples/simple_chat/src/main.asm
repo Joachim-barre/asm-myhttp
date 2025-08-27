@@ -140,6 +140,9 @@ events_callback: ;  (HttpRequest*, int fd)
     lea rsi, [rbp-12]
     call ll_push_back
 
+    lea rdi, [listeners]
+    call spin_unlock
+
     ; terminate the handler
     xor rax, rax
 
