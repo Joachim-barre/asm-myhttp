@@ -37,6 +37,12 @@ section .data
     ok_str: db "Ok", 0
         .len equ $- ok_str-1
 
+    data_prefix: db "data: ", 0
+        .len equ $ -data_prefix-1
+
+    data_suffix: db `\r\n\r\n`, 0
+        .len equ $ -data_suffix-1
+
     content_type: db "Content-Type", 0
     event_stream: db "text/event-stream", 0
 
@@ -95,9 +101,9 @@ app_main:
     push rbp
     mov rbp, rsp
 
-    sub rsp, 48
-    ; [rbp-32] responce
-    ; [rbp-48] body
+    sub rsp, 16
+    ; [rbp-8]=listener_iter
+    ; [rbp-16]=tmp
 
     info is, "the app's main thread is running", c, 10
 
@@ -120,7 +126,80 @@ app_main:
 
     info is, "sending the message to the clients : ", sp, [message], c, 10
     
-    ; TODO
+    lea rdi, [listeners_inner]
+    call ll_iter
+
+    mov [rbp-8], rax
+.inner_loop:
+    mov rdi, [rbp-8]
+    call ll_iter_next
+    test rdx, rdx
+    jz .inner_loop_end
+   
+    mov rax, 1 ; sys_write
+    mov edi, [rdx]
+    mov rsi, [data_prefix]
+    mov rdx, data_prefix.len
+    syscall
+
+    mov rax, rax
+    js .error
+
+    mov rdi, [rbp-8]
+    call ll_iter_next
+
+    mov rax, 1 ; sys_write
+    mov edi, [rdx]
+    mov rsi, [message]
+    mov rdx, [message+8]
+    syscall
+
+    test rax, rax
+    js .error
+
+    mov rdi, [rbp-8]
+    call ll_iter_next
+
+    mov rax, 1 ; sys_write
+    mov edi, [rdx]
+    mov rsi, [data_suffix]
+    mov rdx, data_suffix.len
+    syscall
+
+    mov rax, rax
+    js .error
+
+    mov rdi, [rbp-8]
+    call ll_iter_next
+    mov [rbp-8], rax
+
+    jmp .inner_loop
+.error:
+    ; ignore EPIPE
+    cmp rax, -32
+    je .inner_loop_close_connection
+
+    mov [rbp-12], eax
+    mov rdi, [rbp-8]
+    call ll_iter_next
+    mov edx, [rdx]
+    mov [rbp-16], edx
+    error is, "error: ", l, [rbp-12], is, " while sending message to fd : ", i, [rbp-16], c, 10
+.inner_loop_close_connection:
+    mov rax, 3 ; sys_close
+    mov rdi, [rbp-8]
+    call ll_iter_next
+    mov edi, [rdx]
+    syscall
+
+    mov rdi, [rbp-8]
+    lea rsi, [listeners_inner]
+    call ll_iter_remove_next
+    mov [rbp-8], rax
+
+    jmp .inner_loop
+
+.inner_loop_end:
 
     mov rdi, [message]
     call free
